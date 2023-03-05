@@ -1,0 +1,26 @@
+USE [EmployeeDevelopmentMS]
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'dbo' 
+                     AND TABLE_NAME = 'Companies')
+BEGIN
+	CREATE TABLE dbo.Companies (
+		CompanyID int IDENTITY(1,1) PRIMARY KEY,
+		CompanyName nvarchar(max) NULL
+	)
+END
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'dbo' 
+                     AND TABLE_NAME = 'UserCompany')
+BEGIN
+	CREATE TABLE dbo.UserCompany (
+		UserID nvarchar(450),
+		CompanyID int,
+		CONSTRAINT FK_UserCompany_AspNetUsers FOREIGN KEY (UserID) REFERENCES dbo.AspNetUsers(Id),
+		CONSTRAINT FK_UserCompany_Companies FOREIGN KEY (CompanyID) REFERENCES dbo.Companies(CompanyID)
+	)
+END
+GO

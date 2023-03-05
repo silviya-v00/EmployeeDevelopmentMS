@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Администратор начална страница";
+}
+
+@if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+    </div>
+}
+else
+{
+    <div class="text-center" style="color: white;">
+        <h1 class="display-4">Добре дошли!</h1>
+        <p>Администратор</p>
+    </div>
+}
