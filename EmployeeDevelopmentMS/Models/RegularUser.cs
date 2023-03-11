@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace EmployeeDevelopmentMS.Models
 {
-    public class RegisterUser
+    public class RegularUser
     {
-        public int UserID { get; set; }
+        public string UserID { get; set; }
 
         [Required(ErrorMessage = "Моля въведете име.")]
         public string FirstName { get; set; }
@@ -31,7 +31,6 @@ namespace EmployeeDevelopmentMS.Models
         public string ConfirmPassword { get; set; }
 
         public string PhoneNumber { get; set; }
-        public bool IsActive { get; set; }
 
         [Required(ErrorMessage = "Моля въведете компания.")]
         public string CompanyName { get; set; }
@@ -43,5 +42,9 @@ namespace EmployeeDevelopmentMS.Models
                 return FirstName + " " + LastName;
             }
         }
+
+        public bool IsActive { get; set; }
+
+        public Role Role { get; set; }
     }
 }

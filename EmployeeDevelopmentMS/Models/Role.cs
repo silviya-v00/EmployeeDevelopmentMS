@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 namespace EmployeeDevelopmentMS.Models
 {
-    public class Company
+    public class Role
     {
-        public int CompanyID { get; set; }
-        public string CompanyName { get; set; }
+        public string RoleID { get; set; }
+        public string RoleName { get; set; }
     }
 
-    public class UserCompany
+    public class UserRole
     {
         public string UserID { get; set; }
-        public int CompanyID { get; set; }
+        public string RoleID { get; set; }
     }
 }

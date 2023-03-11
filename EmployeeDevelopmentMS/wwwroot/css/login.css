@@ -3,7 +3,6 @@
     justify-content: center;
     align-items: center;
     background: linear-gradient(to bottom, #0f0c29, #190061, #24243e);
-    font-family: 'Jost', sans-serif;
 }
 
 nav {
@@ -94,18 +93,3 @@ nav {
 .form-control {
     border-radius: 12px;
 }
-
-.btn {
-    border-radius: 12px;
-    background-color: #D4AF37;
-    border-color: #D4AF37;
-    color: #FFF;
-    font-weight: bold;
-    width: 100%;
-}
-
-    .btn:hover, .btn:focus, .btn:active {
-        background-color: #A18838;
-        border-color: #A18838;
-        color: #FFF;
-    }

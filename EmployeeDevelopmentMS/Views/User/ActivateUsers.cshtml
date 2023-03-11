@@ -1,0 +1,67 @@
+﻿@{
+    ViewData["Title"] = "Управление на потребители";
+}
+@model List<RegularUser>
+
+<head>
+    <link rel="stylesheet" href="~/css/common.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/js/admin.js"></script>
+</head>
+
+<body>
+    @if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <div style="padding-bottom: 15px;">
+                <div class="chkBtn-group-left">
+                    <span>
+                        <input type="checkbox" id="chkActivateAll" class="chkYellow" />
+                        <label for="chkActivateAll" class="text-white">Активирай всички</label>
+                    </span>
+                </div>
+                <div class="chkBtn-group-right">
+                    <button type="submit" id="btnSave" class="btn btn-block" style="width: 50%; float: right;">Запазване</button>
+                </div>
+            </div>
+            <div>
+                <table id="allUsersTable">
+                    <thead>
+                        <tr>
+                            <th>Компания</th>
+                            <th>Потребителско<br />име</th>
+                            <th>Име</th>
+                            <th>Фамилия</th>
+                            <th>Имейл</th>
+                            <th>Роля</th>
+                            <th>Активиран?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr data-id="@user.UserID">
+                                <td>@user.CompanyName</td>
+                                <td>@user.UserName</td>
+                                <td>@user.FirstName</td>
+                                <td>@user.LastName</td>
+                                <td>@user.Email</td>
+                                <td>@user.Role.RoleName</td>
+                                <td>
+                                    <input type="checkbox" class="chkYellow chkUserActivation" id="" checked="@user.IsActive" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</body>

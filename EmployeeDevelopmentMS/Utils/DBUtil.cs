@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static EmployeeDevelopmentMS.Areas.Identity.Pages.Account.RegisterModel;
 
@@ -16,6 +15,38 @@ namespace EmployeeDevelopmentMS.Utils
         public DBUtil(string connectionString)
         {
             _connectionString = connectionString;
+        }
+
+        public bool IsUserActive(string userName)
+        {
+            bool isUserActive = false;
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT NULL
+                               FROM dbo.AspNetUsers
+                               WHERE IsActive = 1
+                                     AND UserName = @UserName";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserName", System.Data.SqlDbType.NVarChar).Value = userName;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                if (dataReader.Read())
+                {
+                    isUserActive = true;
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return isUserActive;
         }
 
         public bool DoesUserNameExist(string userName)
@@ -159,35 +190,118 @@ namespace EmployeeDevelopmentMS.Utils
             }
         }
 
-        public string ValidatePassword(string password, int requiredLength)
+        public List<RegularUser> GetAllUsers()
         {
-            string errorMessage = "";
-            int counter = 0;
-            List<string> patterns = new List<string>();
-            patterns.Add(@"[a-z]");
-            patterns.Add(@"[A-Z]");
-            patterns.Add(@"[0-9]");
-            patterns.Add(@"[!@#$%^&*\(\)_\+\-\={}<>,\.\|""'~`:;\\?\/\[\] ]");
+            List<RegularUser> allUsers = new List<RegularUser>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
 
-            // count type of different chars in password
-            foreach (string p in patterns)
+            try
             {
-                if (Regex.IsMatch(password, p))
+                string SQL = @"SELECT u.Id as UserID, c.CompanyName, u.UserName, u.FirstName, u.LastName, u.Email, r.Name as RoleName, u.IsActive
+                               FROM dbo.AspNetUsers u
+                               INNER JOIN dbo.AspNetUserRoles ur ON u.Id = ur.UserId
+                               INNER JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
+                               LEFT OUTER JOIN dbo.UserCompany uc ON u.Id = uc.UserId
+                               LEFT OUTER JOIN dbo.Companies c ON uc.CompanyID = c.CompanyID
+                               WHERE r.Name <> 'ADMIN'
+                               ORDER BY c.CompanyName, r.Name, u.FirstName, u.LastName";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
                 {
-                    counter++;
+                    RegularUser user = new RegularUser();
+                    user.UserID = dataReader["UserID"].ToString();
+                    user.CompanyName = dataReader["CompanyName"].ToString();
+                    user.UserName = dataReader["UserName"].ToString();
+                    user.FirstName = dataReader["FirstName"].ToString();
+                    user.LastName = dataReader["LastName"].ToString();
+                    user.Email = dataReader["Email"].ToString();
+                    user.Role = new Role();
+                    user.Role.RoleName = CommonUtil.GetCorrectRoleName(dataReader["RoleName"].ToString());
+                    user.IsActive = (bool)dataReader["IsActive"];
+
+                    allUsers.Add(user);
                 }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
             }
 
-            if (String.IsNullOrEmpty(password) || password.Length < requiredLength)
+            return allUsers;
+        }
+
+        public List<RegularUser> GetAllInactiveUsers()
+        {
+            List<RegularUser> allInactiveUsers = new List<RegularUser>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
             {
-                errorMessage = $"Невалидна парола! Паролата трябва да е с дължина поне {requiredLength} символа!";
+                string SQL = @"SELECT u.Id as UserID, c.CompanyName, u.UserName, u.FirstName, u.LastName, u.Email, r.Name as RoleName, u.IsActive
+                               FROM dbo.AspNetUsers u
+                               INNER JOIN dbo.AspNetUserRoles ur ON u.Id = ur.UserId
+                               INNER JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
+                               LEFT OUTER JOIN dbo.UserCompany uc ON u.Id = uc.UserId
+                               LEFT OUTER JOIN dbo.Companies c ON uc.CompanyID = c.CompanyID
+                               WHERE r.Name <> 'ADMIN'
+	                                 AND u.IsActive = 0
+                               ORDER BY c.CompanyName, r.Name, u.FirstName, u.LastName";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    RegularUser user = new RegularUser();
+                    user.UserID = dataReader["UserID"].ToString();
+                    user.CompanyName = dataReader["CompanyName"].ToString();
+                    user.UserName = dataReader["UserName"].ToString();
+                    user.FirstName = dataReader["FirstName"].ToString();
+                    user.LastName = dataReader["LastName"].ToString();
+                    user.Email = dataReader["Email"].ToString();
+                    user.Role = new Role();
+                    user.Role.RoleName = CommonUtil.GetCorrectRoleName(dataReader["RoleName"].ToString());
+                    user.IsActive = (bool)dataReader["IsActive"];
+
+                    allInactiveUsers.Add(user);
+                }
+                dataReader.Close();
             }
-            else if (counter < patterns.Count)
+            finally
             {
-                errorMessage = "Невалидна парола! Моля използвайте: главни букви, малки букви, цифри и специални символи!";
+                sqlConn.Close();
             }
 
-            return errorMessage;
+            return allInactiveUsers;
+        }
+
+        public void UpdateUserActiveStatus(string userID, bool isActive)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"UPDATE dbo.AspNetUsers
+                               SET IsActive = @IsActive
+                               WHERE Id = @UserID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+                command.Parameters.Add("@IsActive", System.Data.SqlDbType.Bit).Value = isActive;
+
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
         }
     }
 }

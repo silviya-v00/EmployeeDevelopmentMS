@@ -49,10 +49,21 @@ namespace EmployeeDevelopmentMS.Controllers
 
         public IActionResult AdminHome()
         {
+            int allUsersCnt = 0;
+            int allInactiveUsersCnt = 0;
+
             if (!User.IsInRole("ADMIN"))
             {
                 ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
             }
+            else
+            {
+                allUsersCnt = _dbUtil.GetAllUsers().Count;
+                allInactiveUsersCnt = _dbUtil.GetAllInactiveUsers().Count;
+            }
+
+            ViewBag.AllUsersCnt = allUsersCnt;
+            ViewBag.AllInactiveUsersCnt = allInactiveUsersCnt;
 
             return View();
         }
@@ -98,7 +109,7 @@ namespace EmployeeDevelopmentMS.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(RegisterUser model)
+        public async Task<IActionResult> Login(RegularUser model)
         {
             var user = new ApplicationUser();
 
@@ -107,10 +118,22 @@ namespace EmployeeDevelopmentMS.Controllers
                 var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, false, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
-                    user = await _userManager.FindByNameAsync(model.UserName);
-                    _logger.LogInformation("User logged in.");
+                    if (_dbUtil.IsUserActive(model.UserName))
+                    {
+                        user = await _userManager.FindByNameAsync(model.UserName);
+                        _logger.LogInformation("User logged in.");
 
-                    return await RedirectToHomeByRole(user);
+                        return await RedirectToHomeByRole(user);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("invalidUser", "Потребителят не е активен! Предстои активиране от администратор!");
+
+                        ViewBag.IsLoginTabActive = true;
+                        ViewBag.IsRegisterTabActive = false;
+
+                        return View("Login", model);
+                    }
                 }
                 else
                 {
@@ -140,7 +163,7 @@ namespace EmployeeDevelopmentMS.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterUser model)
+        public async Task<IActionResult> Register(RegularUser model)
         {
             var user = new ApplicationUser();
             string errorMessage = "";
@@ -178,7 +201,7 @@ namespace EmployeeDevelopmentMS.Controllers
                     }
                     else
                     {
-                        errorMessage = _dbUtil.ValidatePassword(model.Password, 8);
+                        errorMessage = CommonUtil.ValidatePassword(model.Password, 8);
                         if (!String.IsNullOrEmpty(errorMessage))
                         {
                             ModelState.AddModelError("invalidRegistration", errorMessage);
@@ -201,6 +224,13 @@ namespace EmployeeDevelopmentMS.Controllers
                                 string userID = await _userManager.GetUserIdAsync(user);
                                 int companyID = _dbUtil.InsertCompany(model.CompanyName);
                                 _dbUtil.AddUserCompany(userID, companyID);
+
+                                ModelState.AddModelError("invalidRegistration", "Потребителят не е активен! Предстои активиране от администратор!");
+
+                                ViewBag.IsLoginTabActive = false;
+                                ViewBag.IsRegisterTabActive = true;
+
+                                return View("Login", model);
                             }
                             else
                             {
@@ -217,8 +247,6 @@ namespace EmployeeDevelopmentMS.Controllers
                         }
                     }
                 }
-
-                return await RedirectToHomeByRole(user);
             }
         }
 
