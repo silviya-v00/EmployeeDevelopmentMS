@@ -1,6 +1,25 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@{
+    string homeAction = "Index";
+    
+    if (SignInManager.IsSignedIn(User))
+    {
+        if (User.IsInRole("ADMIN"))
+        {
+            homeAction = "AdminHome";
+        }
+        else if (User.IsInRole("MANAGER"))
+        {
+            homeAction = "ManagerHome";
+        }
+        else if (User.IsInRole("EMPLOYEE"))
+        {
+            homeAction = "EmployeeHome";
+        }
+    }
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +34,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">EmpowerFlow</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="@homeAction">EmpowerFlow</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -23,26 +42,11 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="@homeAction">Начало</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Поверителност</a>
                         </li>
-                        @if (SignInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="Identity"
-                                   asp-page="/Account/Manage/Index"
-                                   title="Manage">Hello @User.Identity.Name!</a>
-                            </li>
-                            @*<li class="nav-item">
-                                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout"
-                                          asp-route-returnUrl="@Url.Page("/", new { area = "" })"
-                                          method="post">
-                                        <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-                                    </form>
-                                </li>*@
-                        }
                     </ul>
                     <partial name="_LoginPartial" />
                 </div>

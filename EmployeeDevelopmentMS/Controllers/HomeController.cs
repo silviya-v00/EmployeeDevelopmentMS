@@ -109,9 +109,19 @@ namespace EmployeeDevelopmentMS.Controllers
                 {
                     user = await _userManager.FindByNameAsync(model.UserName);
                     _logger.LogInformation("User logged in.");
-                }
 
-                return await RedirectToHomeByRole(user);
+                    return await RedirectToHomeByRole(user);
+                }
+                else
+                {
+                    ModelState.AddModelError("invalidUser", "Грешна парола!");
+                    ModelState.AddModelError("invalidUser", "При забравена парола, моля, свържете се с управителя на вашата компания!");
+
+                    ViewBag.IsLoginTabActive = true;
+                    ViewBag.IsRegisterTabActive = false;
+
+                    return View("Login", model);
+                }
             }
             else
             {
@@ -120,9 +130,12 @@ namespace EmployeeDevelopmentMS.Controllers
                     modelValue.Errors.Clear();
                 }
 
-                ModelState.AddModelError("invalidUser", "Грешно потребителско име или парола!");
+                ModelState.AddModelError("invalidUser", "Не съществува такъв потребител!");
 
-                return View(model);
+                ViewBag.IsLoginTabActive = true;
+                ViewBag.IsRegisterTabActive = false;
+
+                return View("Login", model);
             }
         }
 
@@ -130,6 +143,7 @@ namespace EmployeeDevelopmentMS.Controllers
         public async Task<IActionResult> Register(RegisterUser model)
         {
             var user = new ApplicationUser();
+            string errorMessage = "";
 
             if (_dbUtil.DoesUserNameExist(model.UserName))
             {
@@ -164,29 +178,42 @@ namespace EmployeeDevelopmentMS.Controllers
                     }
                     else
                     {
-                        user = new ApplicationUser { UserName = model.UserName, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, PhoneNumber = model.PhoneNumber };
-
-                        var result = await _userManager.CreateAsync(user, model.Password);
-                        if (result.Succeeded)
+                        errorMessage = _dbUtil.ValidatePassword(model.Password, 8);
+                        if (!String.IsNullOrEmpty(errorMessage))
                         {
-                            await _userManager.AddToRoleAsync(user, "MANAGER");
-                            await _signInManager.SignInAsync(user, isPersistent: false);
-
-                            string userID = await _userManager.GetUserIdAsync(user);
-                            int companyID = _dbUtil.InsertCompany(model.CompanyName);
-                            _dbUtil.AddUserCompany(userID, companyID);
-                        }
-                        else
-                        {
-                            foreach (var error in result.Errors)
-                            {
-                                ModelState.AddModelError("invalidRegistration", error.Description);
-                            }
+                            ModelState.AddModelError("invalidRegistration", errorMessage);
 
                             ViewBag.IsLoginTabActive = false;
                             ViewBag.IsRegisterTabActive = true;
 
                             return View("Login", model);
+                        }
+                        else
+                        {
+                            user = new ApplicationUser { UserName = model.UserName, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, PhoneNumber = model.PhoneNumber };
+
+                            var result = await _userManager.CreateAsync(user, model.Password);
+                            if (result.Succeeded)
+                            {
+                                await _userManager.AddToRoleAsync(user, "MANAGER");
+                                await _signInManager.SignInAsync(user, isPersistent: false);
+
+                                string userID = await _userManager.GetUserIdAsync(user);
+                                int companyID = _dbUtil.InsertCompany(model.CompanyName);
+                                _dbUtil.AddUserCompany(userID, companyID);
+                            }
+                            else
+                            {
+                                foreach (var error in result.Errors)
+                                {
+                                    ModelState.AddModelError("invalidRegistration", error.Description);
+                                }
+
+                                ViewBag.IsLoginTabActive = false;
+                                ViewBag.IsRegisterTabActive = true;
+
+                                return View("Login", model);
+                            }
                         }
                     }
                 }

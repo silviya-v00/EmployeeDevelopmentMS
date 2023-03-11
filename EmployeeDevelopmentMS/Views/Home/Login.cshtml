@@ -43,9 +43,12 @@
                             </div>
                             @if (ViewData.ModelState.ContainsKey("invalidUser"))
                             {
-                                <div class="alert alert-danger" role="alert">
-                                    @ViewData.ModelState["invalidUser"].Errors.FirstOrDefault()?.ErrorMessage
-                                </div>
+                                @foreach (var err in ViewData.ModelState["invalidUser"].Errors)
+                                {
+                                    <div class="alert alert-danger" role="alert">
+                                        @err.ErrorMessage
+                                    </div>
+                                }
                             }
                             <button type="submit" id="btnLogin" class="btn btn-block">Вход</button>
                         </form>

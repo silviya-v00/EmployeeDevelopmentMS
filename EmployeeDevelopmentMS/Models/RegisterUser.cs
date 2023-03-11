@@ -23,9 +23,11 @@ namespace EmployeeDevelopmentMS.Models
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Моля въведете парола.")]
+        [Display(Name = "Password")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Моля потвърдете парола.")]
+        [Compare("Password", ErrorMessage = "Паролите не съвпадат.")]
         public string ConfirmPassword { get; set; }
 
         public string PhoneNumber { get; set; }

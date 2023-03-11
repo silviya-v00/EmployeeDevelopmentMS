@@ -1,8 +1,10 @@
 ﻿using EmployeeDevelopmentMS.Models;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static EmployeeDevelopmentMS.Areas.Identity.Pages.Account.RegisterModel;
 
@@ -155,6 +157,37 @@ namespace EmployeeDevelopmentMS.Utils
             {
                 sqlConn.Close();
             }
+        }
+
+        public string ValidatePassword(string password, int requiredLength)
+        {
+            string errorMessage = "";
+            int counter = 0;
+            List<string> patterns = new List<string>();
+            patterns.Add(@"[a-z]");
+            patterns.Add(@"[A-Z]");
+            patterns.Add(@"[0-9]");
+            patterns.Add(@"[!@#$%^&*\(\)_\+\-\={}<>,\.\|""'~`:;\\?\/\[\] ]");
+
+            // count type of different chars in password
+            foreach (string p in patterns)
+            {
+                if (Regex.IsMatch(password, p))
+                {
+                    counter++;
+                }
+            }
+
+            if (String.IsNullOrEmpty(password) || password.Length < requiredLength)
+            {
+                errorMessage = $"Невалидна парола! Паролата трябва да е с дължина поне {requiredLength} символа!";
+            }
+            else if (counter < patterns.Count)
+            {
+                errorMessage = "Невалидна парола! Моля използвайте: главни букви, малки букви, цифри и специални символи!";
+            }
+
+            return errorMessage;
         }
     }
 }
