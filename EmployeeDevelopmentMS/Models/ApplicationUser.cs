@@ -10,14 +10,8 @@ namespace EmployeeDevelopmentMS.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string FullName
-        {
-            get
-            {
-                return FirstName + LastName;
-            }
-        }
         public bool IsActive { get; set; }
-        public bool IsConfirmed { get; set; }
+        public DateTime? RegistrationDate { get; set; }
+        public DateTime? LastLoginDate { get; set; }
     }
 }

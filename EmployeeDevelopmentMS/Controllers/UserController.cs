@@ -50,5 +50,25 @@ namespace EmployeeDevelopmentMS.Controllers
 
             return Json(new { redirectToUrl = Url.Action("AdminHome", "Home") });
         }
+
+        public IActionResult AllUsers()
+        {
+            List<RegularUser> allUsers = new List<RegularUser>();
+            List<string> companies = new List<string>();
+
+            if (!User.IsInRole("ADMIN"))
+            {
+                ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
+            }
+            else
+            {
+                allUsers = _dbUtil.GetAllUsers();
+                companies = allUsers.Select(x => x.CompanyName).Distinct().ToList();
+            }
+
+            ViewBag.Companies = companies;
+
+            return View(allUsers);
+        }
     }
 }

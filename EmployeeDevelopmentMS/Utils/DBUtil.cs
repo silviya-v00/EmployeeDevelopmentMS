@@ -1,5 +1,4 @@
 ﻿using EmployeeDevelopmentMS.Models;
-using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -198,14 +197,14 @@ namespace EmployeeDevelopmentMS.Utils
 
             try
             {
-                string SQL = @"SELECT u.Id as UserID, c.CompanyName, u.UserName, u.FirstName, u.LastName, u.Email, r.Name as RoleName, u.IsActive
+                string SQL = @"SELECT u.Id as UserID, c.CompanyName, u.FirstName, u.LastName, r.Name as RoleName, u.RegistrationDate, u.LastLoginDate, u.IsActive
                                FROM dbo.AspNetUsers u
                                INNER JOIN dbo.AspNetUserRoles ur ON u.Id = ur.UserId
                                INNER JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
                                LEFT OUTER JOIN dbo.UserCompany uc ON u.Id = uc.UserId
                                LEFT OUTER JOIN dbo.Companies c ON uc.CompanyID = c.CompanyID
                                WHERE r.Name <> 'ADMIN'
-                               ORDER BY c.CompanyName, r.Name, u.FirstName, u.LastName";
+                               ORDER BY c.CompanyName, r.Name, u.FirstName, u.LastName, u.RegistrationDate";
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);
                 SqlDataReader dataReader = command.ExecuteReader();
@@ -215,12 +214,12 @@ namespace EmployeeDevelopmentMS.Utils
                     RegularUser user = new RegularUser();
                     user.UserID = dataReader["UserID"].ToString();
                     user.CompanyName = dataReader["CompanyName"].ToString();
-                    user.UserName = dataReader["UserName"].ToString();
                     user.FirstName = dataReader["FirstName"].ToString();
                     user.LastName = dataReader["LastName"].ToString();
-                    user.Email = dataReader["Email"].ToString();
                     user.Role = new Role();
                     user.Role.RoleName = CommonUtil.GetCorrectRoleName(dataReader["RoleName"].ToString());
+                    user.RegistrationDate = (dataReader["RegistrationDate"] is DateTime) ? (DateTime)dataReader["RegistrationDate"] : null;
+                    user.LastLoginDate = (dataReader["LastLoginDate"] is DateTime) ? (DateTime)dataReader["LastLoginDate"] : null;
                     user.IsActive = (bool)dataReader["IsActive"];
 
                     allUsers.Add(user);
@@ -243,7 +242,7 @@ namespace EmployeeDevelopmentMS.Utils
 
             try
             {
-                string SQL = @"SELECT u.Id as UserID, c.CompanyName, u.UserName, u.FirstName, u.LastName, u.Email, r.Name as RoleName, u.IsActive
+                string SQL = @"SELECT u.Id as UserID, c.CompanyName, u.UserName, u.FirstName, u.LastName, u.Email, r.Name as RoleName, u.RegistrationDate, u.IsActive
                                FROM dbo.AspNetUsers u
                                INNER JOIN dbo.AspNetUserRoles ur ON u.Id = ur.UserId
                                INNER JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
@@ -267,6 +266,7 @@ namespace EmployeeDevelopmentMS.Utils
                     user.Email = dataReader["Email"].ToString();
                     user.Role = new Role();
                     user.Role.RoleName = CommonUtil.GetCorrectRoleName(dataReader["RoleName"].ToString());
+                    user.RegistrationDate = (dataReader["RegistrationDate"] is DateTime) ? (DateTime)dataReader["RegistrationDate"] : null;
                     user.IsActive = (bool)dataReader["IsActive"];
 
                     allInactiveUsers.Add(user);

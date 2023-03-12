@@ -10,18 +10,18 @@
         min-width: 120px;
     }
 
-.chkBtn-group-left {
+.submit-btn-group-left {
     width: 50%;
     float: left;
 }
 
-.chkBtn-group-right {
+.submit-btn-group-right {
     width: 50%;
     float: right;
 }
 
 table {
-    width: 850px;
+    width: 1000px;
     border-collapse: collapse;
     overflow: hidden;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);

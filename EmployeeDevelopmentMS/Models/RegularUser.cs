@@ -46,5 +46,9 @@ namespace EmployeeDevelopmentMS.Models
         public bool IsActive { get; set; }
 
         public Role Role { get; set; }
+
+        public DateTime? RegistrationDate { get; set; }
+
+        public DateTime? LastLoginDate { get; set; }
     }
 }

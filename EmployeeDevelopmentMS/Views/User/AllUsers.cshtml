@@ -21,13 +21,23 @@
         <div class="table-wrapper">
             <div style="padding-bottom: 15px;">
                 <div class="submit-btn-group-left">
-                    <span>
-                        <input type="checkbox" id="chkActivateAll" class="chkYellow" />
-                        <label for="chkActivateAll" class="text-white">Активирай всички</label>
-                    </span>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="companies">Компании:</label>
+                                <select id="companies" name="Companies" multiple class="form-control">
+                                    <option value="test1">Тест</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstName">Име:</label>
+                            <input type="text" id="firstName" name="FirstName" class="form-control">
+                        </div>
+                    </div>
                 </div>
                 <div class="submit-btn-group-right">
-                    <button type="submit" id="btnSave" class="btn btn-block" style="width: 50%; float: right;">Запазване</button>
+                    <button type="submit" id="btnSearch" class="btn btn-block" style="width: 50%; float: right;">Търси</button>
                 </div>
             </div>
             <div>
@@ -35,12 +45,11 @@
                     <thead>
                         <tr>
                             <th>Компания</th>
-                            <th>Потребителско<br />име</th>
                             <th>Име</th>
                             <th>Фамилия</th>
-                            <th>Имейл</th>
                             <th>Роля</th>
                             <th>Регистрация</th>
+                            <th>Последно<br />влизане</th>
                             <th>Активиран?</th>
                         </tr>
                     </thead>
@@ -49,15 +58,12 @@
                         {
                             <tr data-id="@user.UserID">
                                 <td>@user.CompanyName</td>
-                                <td>@user.UserName</td>
                                 <td>@user.FirstName</td>
                                 <td>@user.LastName</td>
-                                <td>@user.Email</td>
                                 <td>@user.Role.RoleName</td>
                                 <td>@(user.RegistrationDate.HasValue ? user.RegistrationDate.Value.ToString("MM/dd/yyyy") : "")</td>
-                                <td>
-                                    <input type="checkbox" class="chkYellow chkUserActivation" id="" checked="@user.IsActive" />
-                                </td>
+                                <td>@(user.LastLoginDate.HasValue ? user.LastLoginDate.Value.ToString("MM/dd/yyyy") : "")</td>
+                                <td>@(user.IsActive ? "Активен" : "Неактивен")</td>
                             </tr>
                         }
                     </tbody>

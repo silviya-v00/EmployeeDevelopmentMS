@@ -19,15 +19,15 @@ else
             <div class="card admin-info" style="float: right;">
                 <div class="card-body">
                     <h5 class="card-title text-center">Всички потребители</h5>
-                    <p class="card-text">В EmpowerFlow взимат участие @ViewBag.AllUsersCnt потребителя.</p>
-                    <a class="btn btn-block btn-bottom" asp-area="" asp-controller="User" asp-action="ActivateUsers">Прегледай</a>
+                    <p class="card-text">EmpowerFlow се състои от @ViewBag.AllUsersCnt потребителя.</p>
+                    <a class="btn btn-block btn-bottom" asp-area="" asp-controller="User" asp-action="AllUsers">Прегледай</a>
                 </div>
             </div>
         </div>
         <div class="col-sm-6">
             <div class="card admin-info" style="float: left;">
                 <div class="card-body">
-                    <h5 class="card-title text-center">Управление на потребители</h5>
+                    <h5 class="card-title text-center">Активиране на потребители</h5>
                     <p class="card-text">В момента има @ViewBag.AllInactiveUsersCnt изчакващи потребителя за активиране на дoстъпа до системата.</p>
                     <a class="btn btn-block btn-bottom" asp-area="" asp-controller="User" asp-action="ActivateUsers">Прегледай</a>
                 </div>

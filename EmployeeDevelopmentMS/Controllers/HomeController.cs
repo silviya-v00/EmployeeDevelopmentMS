@@ -121,13 +121,16 @@ namespace EmployeeDevelopmentMS.Controllers
                     if (_dbUtil.IsUserActive(model.UserName))
                     {
                         user = await _userManager.FindByNameAsync(model.UserName);
+                        user.LastLoginDate = DateTime.Now;
+                        await _userManager.UpdateAsync(user);
                         _logger.LogInformation("User logged in.");
 
                         return await RedirectToHomeByRole(user);
                     }
                     else
                     {
-                        ModelState.AddModelError("invalidUser", "Потребителят не е активен! Предстои активиране от администратор!");
+                        await _signInManager.SignOutAsync();
+                        ModelState.AddModelError("invalidUser", "Потребителят не е активен! Предстои активиране на профила от администратор!");
 
                         ViewBag.IsLoginTabActive = true;
                         ViewBag.IsRegisterTabActive = false;
@@ -213,19 +216,18 @@ namespace EmployeeDevelopmentMS.Controllers
                         }
                         else
                         {
-                            user = new ApplicationUser { UserName = model.UserName, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, PhoneNumber = model.PhoneNumber };
+                            user = new ApplicationUser { UserName = model.UserName, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, PhoneNumber = model.PhoneNumber, RegistrationDate = DateTime.Now };
 
                             var result = await _userManager.CreateAsync(user, model.Password);
                             if (result.Succeeded)
                             {
                                 await _userManager.AddToRoleAsync(user, "MANAGER");
-                                await _signInManager.SignInAsync(user, isPersistent: false);
 
                                 string userID = await _userManager.GetUserIdAsync(user);
                                 int companyID = _dbUtil.InsertCompany(model.CompanyName);
                                 _dbUtil.AddUserCompany(userID, companyID);
 
-                                ModelState.AddModelError("invalidRegistration", "Потребителят не е активен! Предстои активиране от администратор!");
+                                ModelState.AddModelError("validRegistration", "Регистрацията е успешна! Предстои активиране на профила от администратор!");
 
                                 ViewBag.IsLoginTabActive = false;
                                 ViewBag.IsRegisterTabActive = true;

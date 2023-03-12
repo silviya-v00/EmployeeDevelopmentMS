@@ -95,6 +95,12 @@
                                     @ViewData.ModelState["invalidRegistration"].Errors.FirstOrDefault()?.ErrorMessage
                                 </div>
                             }
+                            @if (ViewData.ModelState.ContainsKey("validRegistration"))
+                            {
+                                <div class="alert alert-success" role="alert">
+                                    @ViewData.ModelState["validRegistration"].Errors.FirstOrDefault()?.ErrorMessage
+                                </div>
+                            }
                             <button type="submit" id="btnRegister" class="btn btn-block">Регистрация</button>
                         </form>
                     </div>
