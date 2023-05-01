@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Управление на потребители";
+    ViewData["Title"] = "Всички потребители";
 }
 @model List<RegularUser>
 
@@ -19,29 +19,57 @@
     else
     {
         <div class="table-wrapper">
-            <div style="padding-bottom: 15px;">
-                <div class="submit-btn-group-left">
-                    <div class="row">
-                        <div class="col">
-                            <div class="form-group">
-                                <label for="companies">Компании:</label>
-                                <select id="companies" name="Companies" multiple class="form-control">
-                                    <option value="test1">Тест</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="firstName">Име:</label>
-                            <input type="text" id="firstName" name="FirstName" class="form-control">
-                        </div>
-                    </div>
-                </div>
-                <div class="submit-btn-group-right">
-                    <button type="submit" id="btnSearch" class="btn btn-block" style="width: 50%; float: right;">Търси</button>
-                </div>
+            <div class="text-center text-white" style="margin-bottom: 50px;">
+                <h2>Всички потребители</h2>
             </div>
             <div>
-                <table id="allUsersTable">
+                <table>
+                    <tr>
+                        <td style="width: 80%;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td rowspan="2" class="filterTableLabelCell text-white">Компании:</td>
+                                    <td rowspan="2">
+                                        <select id="companies" multiple>
+                                            @foreach (var option in ViewBag.Companies)
+                                            {
+                                                <option value="@option.CompanyID">@option.CompanyName</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td class="filterTableLabelCell text-white">Име:</td>
+                                    <td>
+                                        <input type="text" id="firstName" name="FirstName" class="form-control">
+                                    </td>
+                                    <td class="filterTableLabelCell text-white">Фамилия:</td>
+                                    <td>
+                                        <input type="text" id="lastName" name="LastName" class="form-control">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="filterTableLabelCell text-white">Роля:</td>
+                                    <td>
+                                        <input type="text" id="role" name="Role" class="form-control">
+                                    </td>
+                                    <td class="filterTableLabelCell text-white">Статус:</td>
+                                    <td>
+                                        <select id="status" style="width: 100%;">
+                                            <option value="All">Всички</option>
+                                            <option value="Active">Активни</option>
+                                            <option value="Inactive">Неактивни</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="width: 20%;">
+                            <button type="submit" id="btnSearch" class="btn btn-block">Търси</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                <table class="fancyTable" id="allUsersTable">
                     <thead>
                         <tr>
                             <th>Компания</th>
@@ -50,7 +78,7 @@
                             <th>Роля</th>
                             <th>Регистрация</th>
                             <th>Последно<br />влизане</th>
-                            <th>Активиран?</th>
+                            <th>Статус</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -1,9 +1,17 @@
 ﻿
+table {
+    width: 1000px;
+}
+
+table th, td {
+    padding: 10px;
+}
+
 .table-wrapper {
     display: table;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 100px;
+    margin-top: 50px;
 }
 
     .table-wrapper table {
@@ -20,8 +28,7 @@
     float: right;
 }
 
-table {
-    width: 1000px;
+.fancyTable {
     border-collapse: collapse;
     overflow: hidden;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
@@ -29,35 +36,39 @@ table {
     margin-top: 30px;
 }
 
-th, td {
+.fancyTable th, .fancyTable td {
     padding: 15px;
     color: #fff;
     text-align: center;
 }
 
-thead th {
+.fancyTable thead th {
     background-color: #55608f;
 }
 
-tbody tr:hover {
+.fancyTable tbody tr:hover {
     background-color: rgba(255, 255, 255, 0.3);
 }
 
-tbody td {
+.fancyTable tbody td {
     position: relative;
 }
 
-    tbody td:hover:before {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: -9999px;
-        bottom: -9999px;
-        background-color: rgba(255, 255, 255, 0.2);
-        z-index: -1;
-    }
+.fancyTable tbody td:hover:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -9999px;
+    bottom: -9999px;
+    background-color: rgba(255, 255, 255, 0.2);
+    z-index: -1;
+}
 
 .chkYellow {
     accent-color: yellow;
+}
+
+.filterTableLabelCell {
+    text-align: right;
 }

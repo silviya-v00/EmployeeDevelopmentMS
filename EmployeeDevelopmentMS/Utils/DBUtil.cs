@@ -303,5 +303,38 @@ namespace EmployeeDevelopmentMS.Utils
                 sqlConn.Close();
             }
         }
+
+        public List<Company> GetAllCompanies()
+        {
+            List<Company> allCompanies = new List<Company>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT c.CompanyID, c.CompanyName
+                               FROM dbo.Companies c
+                               ORDER BY c.CompanyName";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    Company companyRow = new Company();
+                    companyRow.CompanyID = (int)dataReader["CompanyID"];
+                    companyRow.CompanyName = dataReader["CompanyName"].ToString();
+
+                    allCompanies.Add(companyRow);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return allCompanies;
+        }
     }
 }

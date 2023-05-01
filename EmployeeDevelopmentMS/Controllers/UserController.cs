@@ -54,7 +54,7 @@ namespace EmployeeDevelopmentMS.Controllers
         public IActionResult AllUsers()
         {
             List<RegularUser> allUsers = new List<RegularUser>();
-            List<string> companies = new List<string>();
+            List<Company> companies = new List<Company>();
 
             if (!User.IsInRole("ADMIN"))
             {
@@ -63,7 +63,7 @@ namespace EmployeeDevelopmentMS.Controllers
             else
             {
                 allUsers = _dbUtil.GetAllUsers();
-                companies = allUsers.Select(x => x.CompanyName).Distinct().ToList();
+                companies = _dbUtil.GetAllCompanies();
             }
 
             ViewBag.Companies = companies;
