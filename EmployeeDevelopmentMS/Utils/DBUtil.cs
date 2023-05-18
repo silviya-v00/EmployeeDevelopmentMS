@@ -234,6 +234,83 @@ namespace EmployeeDevelopmentMS.Utils
             return allUsers;
         }
 
+        public List<RegularUser> GetFilteredUsers(SearchUser searchUser)
+        {
+            List<RegularUser> allUsers = new List<RegularUser>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            string whereAdditions = "";
+
+            if (!String.IsNullOrEmpty(searchUser.CompanyIDs))
+            {
+                whereAdditions += " AND c.CompanyID IN (" + searchUser.CompanyIDs + ")";
+            }
+
+            if (!String.IsNullOrEmpty(searchUser.FirstName))
+            {
+                whereAdditions += " AND u.FirstName LIKE '%" + searchUser.FirstName + "%'";
+            }
+
+            if (!String.IsNullOrEmpty(searchUser.LastName))
+            {
+                whereAdditions += " AND u.LastName LIKE '%" + searchUser.LastName + "%'";
+            }
+
+            if (!searchUser.RoleKey.Equals("ALL"))
+            {
+                whereAdditions += " AND r.Name = '" + searchUser.RoleKey + "'";
+            }
+
+            if (!searchUser.Status.Equals("ALL"))
+            {
+                string isActive = "0";
+                if (searchUser.Status.Equals("ACTIVE"))
+                    isActive = "1";
+
+                whereAdditions += " AND u.IsActive = " + isActive;
+            }
+
+            try
+            {
+                string SQL = @"SELECT u.Id as UserID, c.CompanyName, u.FirstName, u.LastName, r.Name as RoleName, u.RegistrationDate, u.LastLoginDate, u.IsActive
+                               FROM dbo.AspNetUsers u
+                               INNER JOIN dbo.AspNetUserRoles ur ON u.Id = ur.UserId
+                               INNER JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
+                               LEFT OUTER JOIN dbo.UserCompany uc ON u.Id = uc.UserId
+                               LEFT OUTER JOIN dbo.Companies c ON uc.CompanyID = c.CompanyID
+                               WHERE r.Name <> 'ADMIN'" + whereAdditions + @"
+                               ORDER BY c.CompanyName, r.Name, u.FirstName, u.LastName, u.RegistrationDate";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    RegularUser user = new RegularUser();
+                    user.UserID = dataReader["UserID"].ToString();
+                    user.CompanyName = dataReader["CompanyName"].ToString();
+                    user.FirstName = dataReader["FirstName"].ToString();
+                    user.LastName = dataReader["LastName"].ToString();
+                    user.Role = new Role();
+                    user.Role.RoleName = CommonUtil.GetCorrectRoleName(dataReader["RoleName"].ToString());
+                    user.RegistrationDate = (dataReader["RegistrationDate"] is DateTime) ? (DateTime)dataReader["RegistrationDate"] : null;
+                    user.LastLoginDate = (dataReader["LastLoginDate"] is DateTime) ? (DateTime)dataReader["LastLoginDate"] : null;
+                    user.IsActive = (bool)dataReader["IsActive"];
+
+                    allUsers.Add(user);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return allUsers;
+        }
+
         public List<RegularUser> GetAllInactiveUsers()
         {
             List<RegularUser> allInactiveUsers = new List<RegularUser>();

@@ -26,11 +26,11 @@
                 <table>
                     <tr>
                         <td style="width: 80%;">
-                            <table style="width: 100%;">
+                            <table style="width: 100%;" id="searchUsersTable">
                                 <tr>
                                     <td rowspan="2" class="filterTableLabelCell text-white">Компании:</td>
                                     <td rowspan="2">
-                                        <select id="companies" multiple>
+                                        <select id="companies" style="color: #495057;" name="Companies[]" multiple>
                                             @foreach (var option in ViewBag.Companies)
                                             {
                                                 <option value="@option.CompanyID">@option.CompanyName</option>
@@ -49,14 +49,18 @@
                                 <tr>
                                     <td class="filterTableLabelCell text-white">Роля:</td>
                                     <td>
-                                        <input type="text" id="role" name="Role" class="form-control">
+                                        <select id="role" name="Role[]" style="width: 100%;" class="form-control">
+                                            <option value="ALL">Всички</option>
+                                            <option value="EMPLOYEE">Служител</option>
+                                            <option value="MANAGER">Управител</option>
+                                        </select>
                                     </td>
                                     <td class="filterTableLabelCell text-white">Статус:</td>
                                     <td>
-                                        <select id="status" style="width: 100%;">
-                                            <option value="All">Всички</option>
-                                            <option value="Active">Активни</option>
-                                            <option value="Inactive">Неактивни</option>
+                                        <select id="status" style="width: 100%;" class="form-control">
+                                            <option value="ALL">Всички</option>
+                                            <option value="ACTIVE">Активни</option>
+                                            <option value="INACTIVE">Неактивни</option>
                                         </select>
                                     </td>
                                 </tr>
@@ -89,8 +93,8 @@
                                 <td>@user.FirstName</td>
                                 <td>@user.LastName</td>
                                 <td>@user.Role.RoleName</td>
-                                <td>@(user.RegistrationDate.HasValue ? user.RegistrationDate.Value.ToString("MM/dd/yyyy") : "")</td>
-                                <td>@(user.LastLoginDate.HasValue ? user.LastLoginDate.Value.ToString("MM/dd/yyyy") : "")</td>
+                                <td>@(user.RegistrationDate.HasValue ? user.RegistrationDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</td>
+                                <td>@(user.LastLoginDate.HasValue ? user.LastLoginDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</td>
                                 <td>@(user.IsActive ? "Активен" : "Неактивен")</td>
                             </tr>
                         }

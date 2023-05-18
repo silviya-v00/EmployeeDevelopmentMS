@@ -3,6 +3,7 @@ using EmployeeDevelopmentMS.Utils;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,6 +70,17 @@ namespace EmployeeDevelopmentMS.Controllers
             ViewBag.Companies = companies;
 
             return View(allUsers);
+        }
+
+        [AcceptVerbs("Post")]
+        public IActionResult SearchUsers(string json)
+        {
+            SearchUser searchUser = JsonConvert.DeserializeObject<SearchUser>(json);
+
+            List<RegularUser> filteredUsers = new List<RegularUser>();
+            filteredUsers = _dbUtil.GetFilteredUsers(searchUser);
+
+            return Json(filteredUsers);
         }
     }
 }
