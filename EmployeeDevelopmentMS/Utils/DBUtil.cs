@@ -189,6 +189,37 @@ namespace EmployeeDevelopmentMS.Utils
             }
         }
 
+        public int GetCompanyIDByUserID(string userID)
+        {
+            int companyID = 0;
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT uc.CompanyID
+                               FROM dbo.UserCompany uc
+                               WHERE uc.UserID = @UserID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                if (dataReader.Read())
+                {
+                    companyID = (int)dataReader["CompanyID"];
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return companyID;
+        }
+
         public List<RegularUser> GetAllUsers()
         {
             List<RegularUser> allUsers = new List<RegularUser>();
@@ -249,12 +280,12 @@ namespace EmployeeDevelopmentMS.Utils
 
             if (!String.IsNullOrEmpty(searchUser.FirstName))
             {
-                whereAdditions += " AND u.FirstName LIKE '%" + searchUser.FirstName + "%'";
+                whereAdditions += " AND u.FirstName LIKE N'%" + searchUser.FirstName + "%'";
             }
 
             if (!String.IsNullOrEmpty(searchUser.LastName))
             {
-                whereAdditions += " AND u.LastName LIKE '%" + searchUser.LastName + "%'";
+                whereAdditions += " AND u.LastName LIKE N'%" + searchUser.LastName + "%'";
             }
 
             if (!searchUser.RoleKey.Equals("ALL"))

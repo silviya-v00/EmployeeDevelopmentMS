@@ -195,7 +195,7 @@ namespace EmployeeDevelopmentMS.Controllers
                 {
                     if (_dbUtil.DoesCompanyExist(model.CompanyName))
                     {
-                        ModelState.AddModelError("invalidRegistration", "Не може да се регистрирате като мениджър на компания, която вече е в системата под ръководството на някой друг!");
+                        ModelState.AddModelError("invalidRegistration", "Не може да се регистрирате като управител на компания, която вече е в системата под ръководството на някой друг!");
 
                         ViewBag.IsLoginTabActive = false;
                         ViewBag.IsRegisterTabActive = true;

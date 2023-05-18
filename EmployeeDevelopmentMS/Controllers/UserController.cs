@@ -82,5 +82,75 @@ namespace EmployeeDevelopmentMS.Controllers
 
             return Json(filteredUsers);
         }
+
+        public IActionResult RegisterEmployee()
+        {
+            if (!User.IsInRole("MANAGER"))
+            {
+                ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RegisterNewEmployee(RegularUser model)
+        {
+            var user = new ApplicationUser();
+            string errorMessage = "";
+
+            if (_dbUtil.DoesUserNameExist(model.UserName))
+            {
+                ModelState.AddModelError("invalidRegistration", "Потребителското име е заето!");
+
+                return View("RegisterEmployee", model);
+            }
+            else
+            {
+                if (_dbUtil.DoesEmailExist(model.Email))
+                {
+                    ModelState.AddModelError("invalidRegistration", "Имейлът е зает!");
+
+                    return View("RegisterEmployee", model);
+                }
+                else
+                {
+                    errorMessage = CommonUtil.ValidatePassword(model.Password, 8);
+                    if (!String.IsNullOrEmpty(errorMessage))
+                    {
+                        ModelState.AddModelError("invalidRegistration", errorMessage);
+
+                        return View("RegisterEmployee", model);
+                    }
+                    else
+                    {
+                        user = new ApplicationUser { UserName = model.UserName, Email = model.Email, FirstName = model.FirstName, LastName = model.LastName, PhoneNumber = model.PhoneNumber, RegistrationDate = DateTime.Now };
+
+                        var result = await _userManager.CreateAsync(user, model.Password);
+                        if (result.Succeeded)
+                        {
+                            await _userManager.AddToRoleAsync(user, "EMPLOYEE");
+                            var currentUser = await _userManager.GetUserAsync(User);
+                            int companyID = _dbUtil.GetCompanyIDByUserID(currentUser.Id);
+                            string userID = await _userManager.GetUserIdAsync(user);
+                            _dbUtil.AddUserCompany(userID, companyID);
+
+                            ModelState.AddModelError("validRegistration", "Регистрацията е успешна! Предстои активиране на профила от администратор!");
+
+                            return View("RegisterEmployee", model);
+                        }
+                        else
+                        {
+                            foreach (var error in result.Errors)
+                            {
+                                ModelState.AddModelError("invalidRegistration", error.Description);
+                            }
+
+                            return View("RegisterEmployee", model);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -1,0 +1,84 @@
+﻿@{
+    ViewData["Title"] = "Регистриране на служители";
+}
+@model RegularUser
+
+<head>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+
+<body>
+    @if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-white" style="margin-bottom: 50px;">
+            <h2>Регистриране на служители</h2>
+        </div>
+        <div class="login-container">
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="tabEl">
+                        <div class="tab-pane fade show active" id="register" role="tabpanel" aria-labelledby="register-tab">
+                            <form asp-action="RegisterNewEmployee" method="post">
+                                <div class="form-group">
+                                    <label for="inputFirstNameRegister">Име</label>
+                                    <input type="text" class="form-control" id="inputFirstNameRegister" asp-for="FirstName" placeholder="Въведете име">
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputLastNameRegister">Фамилия</label>
+                                    <input type="text" class="form-control" id="inputLastNameRegister" asp-for="LastName" placeholder="Въведете фамилия">
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputEmailRegister">Имейл</label>
+                                    <input type="email" class="form-control" id="inputEmailRegister" asp-for="Email" placeholder="Въведете имейл">
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputUserNameRegister">Потребителско име</label>
+                                    <input type="text" class="form-control" id="inputUserNameRegisterRegister" asp-for="UserName" placeholder="Въведете потребителско име">
+                                    <span asp-validation-for="UserName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputPasswordRegister">Парола</label>
+                                    <input type="password" class="form-control" id="inputPasswordRegister" asp-for="Password" placeholder="Въведете парола">
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputConfirmPasswordRegister">Потвърдете парола</label>
+                                    <input type="password" class="form-control" id="inputConfirmPasswordRegister" asp-for="ConfirmPassword" placeholder="Потвърдете парола">
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                                @if (ViewData.ModelState.ContainsKey("invalidRegistration"))
+                                {
+                                    <div class="alert alert-danger" role="alert">
+                                        @ViewData.ModelState["invalidRegistration"].Errors.FirstOrDefault()?.ErrorMessage
+                                    </div>
+                                }
+                                @if (ViewData.ModelState.ContainsKey("validRegistration"))
+                                {
+                                    <div class="alert alert-success" role="alert">
+                                        @ViewData.ModelState["validRegistration"].Errors.FirstOrDefault()?.ErrorMessage
+                                    </div>
+                                }
+                                <button type="submit" id="btnRegister" class="btn btn-block">Регистрация</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</body>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
