@@ -1,0 +1,23 @@
+USE [EmployeeDevelopmentMS]
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Tasks')
+BEGIN
+	CREATE TABLE dbo.Tasks (
+		TaskID int IDENTITY(1,1) PRIMARY KEY,		
+		TaskTitle nvarchar(450),	
+		TaskDescription nvarchar(max),
+		EmployeeID nvarchar(450),
+		EstimatedHours int,
+		WorkedHours int,
+		CreatedDate datetime,
+		CreatedByID nvarchar(450),
+		CompletedDate datetime,
+		RatePoints int,
+		IsRated bit
+		CONSTRAINT FK_Tasks_AspNetUsers_EmployeeID FOREIGN KEY (EmployeeID) REFERENCES dbo.AspNetUsers(Id),
+		CONSTRAINT FK_Tasks_AspNetUsers_CreatedByID FOREIGN KEY (CreatedByID) REFERENCES dbo.AspNetUsers(Id)
+	)
+END
+GO

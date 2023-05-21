@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Управление на задачи";
+}
+@model EmployeeTask
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/common.css" />
+    <link rel="stylesheet" href="~/css/card-task.css" />
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/js/tasks.js"></script>
+</head>
+
+<body>
+    @if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-white" style="margin-bottom: 50px;">
+            <h2>Управление на задачи</h2>
+        </div>
+        <div>
+            <div class="create-task">
+                <div class="task-card">
+                    <div class="card-body">
+                        <div class="tab-content" id="tabEl">
+                            <div id="task-form">
+                                <div class="form-group" style="display: none;">
+                                    <input type="text" class="form-control" id="hdnTaskID" asp-for="TaskID">
+                                    <input type="text" class="form-control" id="hdnCreatedByID" asp-for="CreatedByID" value="@ViewBag.CurrentUserID">
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputTaskTitle">Заглавие</label>
+                                    <input type="text" class="form-control" id="inputTaskTitle" asp-for="TaskTitle" placeholder="Въведете заглавие">
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputTaskDescription">Описание</label>
+                                    <textarea maxlength="100" class="form-control" id="inputTaskDescription" asp-for="TaskDescription" placeholder="Въведете описание"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ddEmployees">Служител</label>
+                                    <select id="ddEmployees" name="Employees[]" class="form-control" style="color: #495057;">
+                                        @foreach (var option in ViewBag.EmployeesInCompany)
+                                        {
+                                            <option value="@option.EmployeeID">@option.EmployeeName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputEstHours">Часове за работа</label>
+                                    <input type="number" min="0" class="form-control" id="inputEstHours" asp-for="EstimatedHours">
+                                </div>
+                                <button type="submit" id="btnSaveTask" class="btn btn-block">Запиши</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-wrapper">
+                <div class="row">
+                    @foreach (var option in ViewBag.AllTasksByManager)
+                    {
+                        <div class="column">
+                            <div class="task-card" id="task-@option.TaskID">
+                                <h4 id="taskTitle">@option.TaskTitle</h4>
+                                <p id="taskDescription">@option.TaskDescription</p>
+                                <div class="row">
+                                    <div class="column">
+                                        <span>За:</span><br /><span id="employee" data-id="@option.Employee.EmployeeID">@option.Employee.EmployeeName</span>
+                                    </div>
+                                    <div class="column">
+                                        <span>Часове:</span><br /><span id="hours" worked-hours="@option.WorkedHours" est-hours="@option.EstimatedHours">@option.WorkedHours/@option.EstimatedHours</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <i class="fa-solid fa-pen-to-square" onclick="EditTask(@option.TaskID)"></i>
+                                    <i class="fa-solid fa-trash-can" onclick="DeleteTask(@option.TaskID)"></i>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</body>

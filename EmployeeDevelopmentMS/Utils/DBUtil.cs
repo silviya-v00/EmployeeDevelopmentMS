@@ -389,6 +389,159 @@ namespace EmployeeDevelopmentMS.Utils
             return allInactiveUsers;
         }
 
+        public List<Employee> GetEmployeesByCompanyID(int companyID)
+        {
+            List<Employee> taskEmployees = new List<Employee>();
+            taskEmployees.Add(new Employee() { EmployeeID = "-1", EmployeeName = "" });
+
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT a.Id as EmployeeID, a.UserName as EmployeeName
+                               FROM dbo.AspNetUsers a
+                               INNER JOIN dbo.UserCompany uc ON a.Id = uc.UserID
+                               INNER JOIN dbo.AspNetUserRoles ur ON a.Id = ur.UserId
+                               INNER JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
+                               WHERE r.Name = 'EMPLOYEE'
+	                                 AND uc.CompanyID = @CompanyID
+                               ORDER BY a.UserName";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@CompanyID", System.Data.SqlDbType.Int).Value = companyID;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    Employee employee = new Employee();
+                    employee.EmployeeID = dataReader["EmployeeID"].ToString();
+                    employee.EmployeeName = dataReader["EmployeeName"].ToString();
+
+                    taskEmployees.Add(employee);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return taskEmployees;
+        }
+
+        public List<EmployeeTask> GetAllTasksByManagerID(string managerID)
+        {
+            List<EmployeeTask> tasks = new List<EmployeeTask>();
+
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT a.TaskID, a.TaskTitle, a.TaskDescription, a.EmployeeID, b.UserName, a.WorkedHours, a.EstimatedHours
+                               FROM dbo.Tasks a
+                               INNER JOIN dbo.AspNetUsers b ON a.EmployeeID = b.Id
+                               WHERE a.CreatedByID = @ManagerID
+                               ORDER BY a.CreatedDate";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@ManagerID", System.Data.SqlDbType.NVarChar).Value = managerID;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    EmployeeTask task = new EmployeeTask();
+                    task.TaskID = (int)dataReader["TaskID"];
+                    task.TaskTitle = dataReader["TaskTitle"].ToString();
+                    task.TaskDescription = dataReader["TaskDescription"].ToString();
+
+                    Employee employee = new Employee();
+                    employee.EmployeeID = dataReader["EmployeeID"].ToString();
+                    employee.EmployeeName = dataReader["UserName"].ToString();
+                    task.Employee = employee;
+
+                    task.WorkedHours = dataReader["WorkedHours"] is int ? (int)dataReader["WorkedHours"] : 0;
+                    task.EstimatedHours = (int)dataReader["EstimatedHours"];
+
+                    tasks.Add(task);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return tasks;
+        }
+
+        public void SaveTask(EmployeeTask task)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+            string SQL = "";
+
+            try
+            {
+                if (task.TaskID.HasValue)
+                {
+                    SQL = @"UPDATE dbo.Tasks
+                            SET TaskTitle		= @TaskTitle,
+	                            TaskDescription	= @TaskDescription,
+	                            EmployeeID		= @EmployeeID,
+	                            EstimatedHours	= @EstimatedHours
+                            WHERE TaskID = @TaskID";
+                }
+                else
+                {
+                    SQL = @"INSERT INTO dbo.Tasks (TaskTitle,TaskDescription,EmployeeID,EstimatedHours,CreatedDate,CreatedByID)
+                            VALUES (@TaskTitle,@TaskDescription,@EmployeeID,@EstimatedHours,@CreatedDate,@CreatedByID)";
+                }
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                if (task.TaskID.HasValue)
+                {
+                    command.Parameters.Add("@TaskID", System.Data.SqlDbType.Int).Value = task.TaskID;
+                }
+                command.Parameters.Add("@TaskTitle", System.Data.SqlDbType.NVarChar).Value = task.TaskTitle;
+                command.Parameters.Add("@TaskDescription", System.Data.SqlDbType.NVarChar).Value = task.TaskDescription;
+                command.Parameters.Add("@EmployeeID", System.Data.SqlDbType.NVarChar).Value = task.Employee.EmployeeID;
+                command.Parameters.Add("@EstimatedHours", System.Data.SqlDbType.Int).Value = task.EstimatedHours;
+                command.Parameters.Add("@CreatedDate", System.Data.SqlDbType.DateTime).Value = DateTime.Now;
+                command.Parameters.Add("@CreatedByID", System.Data.SqlDbType.NVarChar).Value = task.CreatedByID;
+
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
+        public void DeleteTask(int taskID)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"DELETE FROM dbo.Tasks
+                               WHERE TaskID = @TaskID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@TaskID", System.Data.SqlDbType.Int).Value = taskID;
+
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
         public void UpdateUserActiveStatus(string userID, bool isActive)
         {
             var sqlConn = new SqlConnection(_connectionString);

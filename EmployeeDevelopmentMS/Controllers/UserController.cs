@@ -152,5 +152,50 @@ namespace EmployeeDevelopmentMS.Controllers
                 }
             }
         }
+
+        public async Task<IActionResult> TaskManagement()
+        {
+            List<Employee> employeesInCompany = new List<Employee>();
+            string currentUserID = "";
+            List<EmployeeTask> allTasksByManager = new List<EmployeeTask>();
+
+            if (!User.IsInRole("MANAGER"))
+            {
+                ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
+            }
+            else
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                currentUserID = currentUser.Id;
+                int companyID = _dbUtil.GetCompanyIDByUserID(currentUserID);
+                employeesInCompany = _dbUtil.GetEmployeesByCompanyID(companyID);
+                allTasksByManager = _dbUtil.GetAllTasksByManagerID(currentUserID);
+            }
+
+            ViewBag.EmployeesInCompany = employeesInCompany;
+            ViewBag.CurrentUserID = currentUserID;
+            ViewBag.AllTasksByManager = allTasksByManager;
+            return View();
+        }
+
+        [AcceptVerbs("Post")]
+        public IActionResult SaveTask(string json)
+        {
+            EmployeeTask task = JsonConvert.DeserializeObject<EmployeeTask>(json);
+
+            _dbUtil.SaveTask(task);
+
+            return Json(new { redirectToUrl = Url.Action("TaskManagement", "User") });
+        }
+
+        [AcceptVerbs("Post")]
+        public IActionResult DeleteTask(string json)
+        {
+            EmployeeTask task = JsonConvert.DeserializeObject<EmployeeTask>(json);
+
+            _dbUtil.DeleteTask(task.TaskID.Value);
+
+            return Json(new { redirectToUrl = Url.Action("TaskManagement", "User") });
+        }
     }
 }
