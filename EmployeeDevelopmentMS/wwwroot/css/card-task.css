@@ -6,9 +6,10 @@
 .create-task {
     width: 20%;
     float: left;
-    position: fixed;
     border-right: 6px solid #ffc107;
     margin-top: 10px;
+    position: fixed;
+    bottom: 0;
 }
 
 .card-wrapper {
@@ -44,4 +45,9 @@
 
 i:hover {
     cursor: pointer;
+}
+
+.taskRateBar {
+    accent-color: #8c15df;
+    vertical-align: middle;
 }

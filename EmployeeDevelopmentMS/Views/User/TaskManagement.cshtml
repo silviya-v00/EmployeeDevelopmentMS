@@ -1,5 +1,12 @@
-﻿@{
-    ViewData["Title"] = "Управление на задачи";
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = (User.IsInRole("MANAGER") ? "Управление на задачи" : "Задачи");
+    string userRole = (User.IsInRole("MANAGER") ? "MANAGER" : (User.IsInRole("EMPLOYEE") ? "EMPLOYEE" : "ADMIN"));
+    int lowestRatePoint = 1;
+    int highestRatePoint = 10;
 }
 @model EmployeeTask
 
@@ -21,16 +28,18 @@
     else
     {
         <div class="text-center text-white" style="margin-bottom: 50px;">
-            <h2>Управление на задачи</h2>
+            <h2>@(User.IsInRole("MANAGER") ? "Управление на задачи" : "Задачи")</h2>
         </div>
         <div>
             <div class="create-task">
-                <div class="task-card">
+                <div class="task-card" style="padding-top: 10px;">
                     <div class="card-body">
                         <div class="tab-content" id="tabEl">
                             <div id="task-form">
                                 <div class="form-group" style="display: none;">
+                                    <input type="text" class="form-control" id="hdnUserRole" value="@userRole">
                                     <input type="text" class="form-control" id="hdnTaskID" asp-for="TaskID">
+                                    <input type="text" class="form-control" id="hdnTaskIsCompleted" value="">
                                     <input type="text" class="form-control" id="hdnCreatedByID" asp-for="CreatedByID" value="@ViewBag.CurrentUserID">
                                 </div>
                                 <div class="form-group">
@@ -50,9 +59,26 @@
                                         }
                                     </select>
                                 </div>
+                                <div class="row">
+                                    <div class="col-6 form-group">
+                                        <label for="inputWorkedHours">Изработени часове</label>
+                                        <input type="number" min="0" class="form-control" id="inputWorkedHours" asp-for="WorkedHours">
+                                    </div>
+                                    <div class="col-6 form-group">
+                                        <label for="inputEstHours">Часове за работа</label>
+                                        <input type="number" min="0" class="form-control" id="inputEstHours" asp-for="EstimatedHours">
+                                    </div>
+                                </div>
                                 <div class="form-group">
-                                    <label for="inputEstHours">Часове за работа</label>
-                                    <input type="number" min="0" class="form-control" id="inputEstHours" asp-for="EstimatedHours">
+                                    <label for="ddRatePoints">Оценка</label>
+                                    <select id="ddRatePoints" name="RatePoints[]" class="form-control" style="color: #495057;">
+                                        <option value="-1"></option>
+                                        @while (lowestRatePoint <= highestRatePoint)
+                                        {
+                                            <option value="@lowestRatePoint">@lowestRatePoint</option>
+                                            lowestRatePoint++;
+                                        }
+                                    </select>
                                 </div>
                                 <button type="submit" id="btnSaveTask" class="btn btn-block">Запиши</button>
                             </div>
@@ -66,6 +92,10 @@
                     {
                         <div class="column">
                             <div class="task-card" id="task-@option.TaskID">
+                                <div style="display: none;">
+                                    <span id="hdnIsCompleted">@option.IsCompleted</span>
+                                    <span id="hdnRatePoints">@option.RatePoints</span>
+                                </div>
                                 <h4 id="taskTitle">@option.TaskTitle</h4>
                                 <p id="taskDescription">@option.TaskDescription</p>
                                 <div class="row">
@@ -77,8 +107,15 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <i class="fa-solid fa-pen-to-square" onclick="EditTask(@option.TaskID)"></i>
-                                    <i class="fa-solid fa-trash-can" onclick="DeleteTask(@option.TaskID)"></i>
+                                    <progress class="taskRateBar" value="@(option.RatePoints * 10)" max="100"></progress>&nbsp;&nbsp;
+                                    @if (User.IsInRole("MANAGER") || (User.IsInRole("EMPLOYEE") && !option.IsRated))
+                                    {
+                                        <i class="fa-solid fa-pen-to-square" onclick="EditTask(@option.TaskID)"></i>
+                                    }
+                                    @if (User.IsInRole("MANAGER"))
+                                    {
+                                        <i class="fa-solid fa-trash-can" onclick="DeleteTask(@option.TaskID)"></i>
+                                    }
                                 </div>
                             </div>
                         </div>

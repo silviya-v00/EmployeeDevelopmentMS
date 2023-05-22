@@ -431,23 +431,38 @@ namespace EmployeeDevelopmentMS.Utils
             return taskEmployees;
         }
 
-        public List<EmployeeTask> GetAllTasksByManagerID(string managerID)
+        public List<EmployeeTask> GetAllTasksByUserID(string userID, bool isUserManager)
         {
             List<EmployeeTask> tasks = new List<EmployeeTask>();
+            string whereAdditions = "WHERE ";
+
+            if (isUserManager)
+            {
+                whereAdditions += @"a.CreatedByID = @UserID";
+            }
+            else
+            {
+                whereAdditions += @"a.EmployeeID = @UserID";
+            }
 
             var sqlConn = new SqlConnection(_connectionString);
             sqlConn.Open();
 
             try
             {
-                string SQL = @"SELECT a.TaskID, a.TaskTitle, a.TaskDescription, a.EmployeeID, b.UserName, a.WorkedHours, a.EstimatedHours
+                string SQL = @"SELECT a.TaskID, a.TaskTitle, a.TaskDescription, a.EmployeeID, b.UserName,
+                               a.WorkedHours, a.EstimatedHours, a.RatePoints, a.IsRated,
+							   CASE WHEN a.CompletedDate IS NULL
+									THEN 0
+									ELSE 1
+							   END as IsCompleted
                                FROM dbo.Tasks a
                                INNER JOIN dbo.AspNetUsers b ON a.EmployeeID = b.Id
-                               WHERE a.CreatedByID = @ManagerID
+                               " + whereAdditions + @"
                                ORDER BY a.CreatedDate";
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);
-                command.Parameters.Add("@ManagerID", System.Data.SqlDbType.NVarChar).Value = managerID;
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
 
                 SqlDataReader dataReader = command.ExecuteReader();
 
@@ -465,6 +480,9 @@ namespace EmployeeDevelopmentMS.Utils
 
                     task.WorkedHours = dataReader["WorkedHours"] is int ? (int)dataReader["WorkedHours"] : 0;
                     task.EstimatedHours = (int)dataReader["EstimatedHours"];
+                    task.RatePoints = dataReader["RatePoints"] is int ? (int)dataReader["RatePoints"] : 0;
+                    task.IsRated = dataReader["IsRated"] is bool ? (bool)dataReader["IsRated"] : false;
+                    task.IsCompleted = Convert.ToBoolean((int)dataReader["IsCompleted"]);
 
                     tasks.Add(task);
                 }
@@ -533,6 +551,57 @@ namespace EmployeeDevelopmentMS.Utils
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);
                 command.Parameters.Add("@TaskID", System.Data.SqlDbType.Int).Value = taskID;
+
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
+        public void CompleteTask(EmployeeTask task)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"UPDATE dbo.Tasks
+                               SET WorkedHours		= @WorkedHours,
+	                               CompletedDate	= @CompletedDate
+                               WHERE TaskID = @TaskID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@TaskID", System.Data.SqlDbType.Int).Value = task.TaskID;
+                command.Parameters.Add("@WorkedHours", System.Data.SqlDbType.Int).Value = task.WorkedHours;
+                command.Parameters.Add("@CompletedDate", System.Data.SqlDbType.DateTime).Value = DateTime.Now;
+
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
+        public void RateTask(EmployeeTask task)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+            bool isRated = task.RatePoints.HasValue && task.RatePoints.Value != -1;
+
+            try
+            {
+                string SQL = @"UPDATE dbo.Tasks
+                               SET RatePoints		= @RatePoints,
+	                               IsRated	        = @IsRated
+                               WHERE TaskID = @TaskID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@TaskID", System.Data.SqlDbType.Int).Value = task.TaskID;
+                command.Parameters.Add("@RatePoints", System.Data.SqlDbType.Int).Value = (isRated ? task.RatePoints.Value : DBNull.Value);
+                command.Parameters.Add("@IsRated", System.Data.SqlDbType.Bit).Value = isRated;
 
                 command.ExecuteNonQuery();
             }

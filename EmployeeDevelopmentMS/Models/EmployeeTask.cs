@@ -17,8 +17,9 @@ namespace EmployeeDevelopmentMS.Models
         public DateTime CreatedDate { get; set; }
         public string CreatedByID { get; set; }
         public DateTime? CompletedDate { get; set; }
+        public bool IsCompleted { get; set; }
         public int? RatePoints { get; set; }
-        public bool IsRated { get; set; }
+        public bool? IsRated { get; set; }
     }
 
     public class Employee

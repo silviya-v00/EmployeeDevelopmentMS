@@ -159,7 +159,7 @@ namespace EmployeeDevelopmentMS.Controllers
             string currentUserID = "";
             List<EmployeeTask> allTasksByManager = new List<EmployeeTask>();
 
-            if (!User.IsInRole("MANAGER"))
+            if (User.IsInRole("ADMIN"))
             {
                 ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
             }
@@ -169,7 +169,15 @@ namespace EmployeeDevelopmentMS.Controllers
                 currentUserID = currentUser.Id;
                 int companyID = _dbUtil.GetCompanyIDByUserID(currentUserID);
                 employeesInCompany = _dbUtil.GetEmployeesByCompanyID(companyID);
-                allTasksByManager = _dbUtil.GetAllTasksByManagerID(currentUserID);
+
+                if (User.IsInRole("MANAGER"))
+                {
+                    allTasksByManager = _dbUtil.GetAllTasksByUserID(currentUserID, true);
+                }
+                else
+                {
+                    allTasksByManager = _dbUtil.GetAllTasksByUserID(currentUserID, false);
+                }
             }
 
             ViewBag.EmployeesInCompany = employeesInCompany;
@@ -194,6 +202,26 @@ namespace EmployeeDevelopmentMS.Controllers
             EmployeeTask task = JsonConvert.DeserializeObject<EmployeeTask>(json);
 
             _dbUtil.DeleteTask(task.TaskID.Value);
+
+            return Json(new { redirectToUrl = Url.Action("TaskManagement", "User") });
+        }
+
+        [AcceptVerbs("Post")]
+        public IActionResult CompleteTask(string json)
+        {
+            EmployeeTask task = JsonConvert.DeserializeObject<EmployeeTask>(json);
+
+            _dbUtil.CompleteTask(task);
+
+            return Json(new { redirectToUrl = Url.Action("TaskManagement", "User") });
+        }
+
+        [AcceptVerbs("Post")]
+        public IActionResult RateTask(string json)
+        {
+            EmployeeTask task = JsonConvert.DeserializeObject<EmployeeTask>(json);
+
+            _dbUtil.RateTask(task);
 
             return Json(new { redirectToUrl = Url.Action("TaskManagement", "User") });
         }
