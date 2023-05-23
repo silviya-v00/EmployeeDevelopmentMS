@@ -11,10 +11,7 @@
 @model EmployeeTask
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="~/css/common.css" />
     <link rel="stylesheet" href="~/css/card-task.css" />
-    <script src="~/lib/jquery/dist/jquery.js"></script>
     <script src="~/js/tasks.js"></script>
 </head>
 
@@ -48,7 +45,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="inputTaskDescription">Описание</label>
-                                    <textarea maxlength="100" class="form-control" id="inputTaskDescription" asp-for="TaskDescription" placeholder="Въведете описание"></textarea>
+                                    <textarea maxlength="100" style="resize: none;" class="form-control" id="inputTaskDescription" asp-for="TaskDescription" placeholder="Въведете описание"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label for="ddEmployees">Служител</label>
