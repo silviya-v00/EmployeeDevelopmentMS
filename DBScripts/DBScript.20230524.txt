@@ -1,0 +1,20 @@
+USE [EmployeeDevelopmentMS]
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'UserPosition')
+BEGIN
+	CREATE TABLE dbo.UserPosition (
+		PositionID int IDENTITY(1,1) PRIMARY KEY,
+		Position nvarchar(max),
+		UserID nvarchar(450),
+		Salary int,
+		StartDate datetime,
+		EndDate datetime,
+		CreatedDate datetime,
+		CreatedByID nvarchar(450)
+		CONSTRAINT FK_UserPosition_AspNetUsers_UserID FOREIGN KEY (UserID) REFERENCES dbo.AspNetUsers(Id),
+		CONSTRAINT FK_UserPosition_AspNetUsers_CreatedByID FOREIGN KEY (CreatedByID) REFERENCES dbo.AspNetUsers(Id)
+	)
+END
+GO

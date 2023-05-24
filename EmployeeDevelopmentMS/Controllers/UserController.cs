@@ -225,5 +225,50 @@ namespace EmployeeDevelopmentMS.Controllers
 
             return Json(new { redirectToUrl = Url.Action("TaskManagement", "User") });
         }
+
+        public async Task<IActionResult> EmployeeManagement()
+        {
+            List<Employee> employeesInCompany = new List<Employee>();
+            string currentUserID = "";
+
+            if (!User.IsInRole("MANAGER"))
+            {
+                ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
+            }
+            else
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                currentUserID = currentUser.Id;
+                int companyID = _dbUtil.GetCompanyIDByUserID(currentUserID);
+                employeesInCompany = _dbUtil.GetEmployeesByCompanyID(companyID);
+            }
+
+            ViewBag.EmployeesInCompany = employeesInCompany;
+
+            return View();
+        }
+
+        [AcceptVerbs("Post")]
+        public IActionResult GetUserPositions(string json)
+        {
+            UserPosition selectedUser = JsonConvert.DeserializeObject<UserPosition>(json);
+
+            List<UserPosition> userPositions = new List<UserPosition>();
+            userPositions = _dbUtil.GetUserPositionsByUserID(selectedUser.Employee.UserID);
+
+            return Json(userPositions);
+        }
+
+        [AcceptVerbs("Post")]
+        public async Task<IActionResult> SavePosition(string json)
+        {
+            UserPosition selectedUser = JsonConvert.DeserializeObject<UserPosition>(json);
+            var currentUser = await _userManager.GetUserAsync(User);
+            selectedUser.CreatedByID = currentUser.Id;
+
+            _dbUtil.SaveNewPosition(selectedUser);
+
+            return Json(null);
+        }
     }
 }

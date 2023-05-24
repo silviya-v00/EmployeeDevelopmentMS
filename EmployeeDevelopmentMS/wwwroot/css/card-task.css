@@ -43,10 +43,6 @@
     border: none;
 }
 
-i:hover {
-    cursor: pointer;
-}
-
 .taskRateBar {
     accent-color: #8c15df;
     vertical-align: middle;

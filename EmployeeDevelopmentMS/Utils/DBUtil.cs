@@ -611,6 +611,101 @@ namespace EmployeeDevelopmentMS.Utils
             }
         }
 
+        public List<UserPosition> GetUserPositionsByUserID(string userID)
+        {
+            List<UserPosition> userPositions = new List<UserPosition>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT a.PositionID, a.UserID, b.UserName, a.Position, a.Salary, a.StartDate, a.EndDate
+                               FROM dbo.UserPosition a
+                               INNER JOIN dbo.AspNetUsers b ON a.UserID = b.Id
+                               WHERE a.UserID = @UserID
+                               ORDER BY a.StartDate
+                               ";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    UserPosition position = new UserPosition();
+                    position.PositionID = (int)dataReader["PositionID"];
+
+                    RegularUser selectedUser = new RegularUser();
+                    selectedUser.UserID = dataReader["UserID"].ToString();
+                    selectedUser.UserName = dataReader["UserName"].ToString();
+                    position.Employee = selectedUser;
+
+                    position.Position = dataReader["Position"].ToString();
+                    position.Salary = (int)dataReader["Salary"];
+                    position.StartDate = (dataReader["StartDate"] is DateTime) ? (DateTime)dataReader["StartDate"] : null;
+                    position.EndDate = (dataReader["EndDate"] is DateTime) ? (DateTime)dataReader["EndDate"] : null;
+
+                    userPositions.Add(position);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return userPositions;
+        }
+
+        public void SaveNewPosition(UserPosition selectedUser)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"DECLARE @PrevPositionEndDate datetime
+                               SET @PrevPositionEndDate = ISNULL(@PreviousPositionEndDate,@StartDate)
+
+                               UPDATE dbo.UserPosition
+                               SET EndDate = @PrevPositionEndDate
+                               WHERE UserID = @UserID AND EndDate IS NULL
+                               ";
+
+                if (selectedUser.HasNewPositionRow)
+                {
+                    SQL += @"INSERT INTO dbo.UserPosition (UserID,Position,Salary,StartDate,EndDate,CreatedDate,CreatedByID)
+                             VALUES (@UserID,@Position,@Salary,@StartDate,@EndDate,@CreatedDate,@CreatedByID)
+                             ";
+                }
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = selectedUser.Employee.UserID;
+                command.Parameters.Add("@PreviousPositionEndDate", System.Data.SqlDbType.DateTime).Value = selectedUser.PreviousPositionEndDate.HasValue ? selectedUser.PreviousPositionEndDate.Value : DBNull.Value;
+
+                if (selectedUser.HasNewPositionRow)
+                {
+                    command.Parameters.Add("@Position", System.Data.SqlDbType.NVarChar).Value = String.IsNullOrEmpty(selectedUser.Position) ? DBNull.Value : selectedUser.Position;
+                    command.Parameters.Add("@Salary", System.Data.SqlDbType.Int).Value = selectedUser.Salary.HasValue ? selectedUser.Salary.Value : DBNull.Value;
+                    command.Parameters.Add("@StartDate", System.Data.SqlDbType.DateTime).Value = selectedUser.StartDate.HasValue ? selectedUser.StartDate.Value : DBNull.Value;
+                    command.Parameters.Add("@EndDate", System.Data.SqlDbType.DateTime).Value = selectedUser.EndDate.HasValue ? selectedUser.EndDate.Value : DBNull.Value;
+                    command.Parameters.Add("@CreatedDate", System.Data.SqlDbType.DateTime).Value = DateTime.Now;
+                    command.Parameters.Add("@CreatedByID", System.Data.SqlDbType.NVarChar).Value = selectedUser.CreatedByID;
+                }
+                else
+                {
+                    command.Parameters.Add("@StartDate", System.Data.SqlDbType.DateTime).Value = DBNull.Value;
+                }
+
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
         public void UpdateUserActiveStatus(string userID, bool isActive)
         {
             var sqlConn = new SqlConnection(_connectionString);

@@ -1,0 +1,61 @@
+﻿@{
+    ViewData["Title"] = "Управление на служители";
+}
+
+<head>
+    <script src="~/js/manager.js"></script>
+</head>
+
+<body>
+    @if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <div class="text-center text-white" style="margin-bottom: 50px;">
+                <h2>Управление на служители</h2>
+            </div>
+            <div>
+                <div>
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                        <label class="filterTableLabelCellCenter text-white" for="ddEmployees">Изберете служител</label>
+                        <select id="ddEmployees" name="Employees[]" class="form-control filterTableSelectCenter">
+                            @foreach (var option in ViewBag.EmployeesInCompany)
+                            {
+                                <option value="@option.EmployeeID">@option.EmployeeName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <table class="fancyTable" id="allPositionsTable">
+                        <thead>
+                            <tr>
+                                <th>Служител</th>
+                                <th>Позиция</th>
+                                <th>Заплата</th>
+                                <th>Начална дата</th>
+                                <th>Крайна дата</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="rowPositionActions" style="padding-top: 15px;">
+                    <div class="submit-btn-group-left" id="iconAddNewPosition">
+                        <i class="fa-regular fa-square-plus" style="color: white; font-size: 32px;" onclick="AddNewPositionRow()"></i>
+                    </div>
+                    <div class="submit-btn-group-right">
+                        <button type="submit" id="btnSavePositions" class="btn btn-block" style="width: 50%; float: right;">Запазване</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</body>

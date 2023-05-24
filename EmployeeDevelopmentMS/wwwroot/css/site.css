@@ -120,6 +120,10 @@ table {
         min-width: 120px;
     }
 
+i:hover {
+    cursor: pointer;
+}
+
 .submit-btn-group-left {
     width: 50%;
     float: left;
@@ -173,4 +177,15 @@ table {
 
 .filterTableLabelCell {
     text-align: right;
+}
+
+.filterTableLabelCellCenter {
+    text-align: center;
+}
+
+.filterTableSelectCenter {
+    color: #495057;
+    width: 30%;
+    display: block;
+    margin: 0 auto;
 }
