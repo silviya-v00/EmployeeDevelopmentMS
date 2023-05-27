@@ -8,6 +8,8 @@ namespace EmployeeDevelopmentMS.Utils
 {
     public static class CommonUtil
     {
+        public static int MaxVacationDays = 20;
+
         public static string ValidatePassword(string password, int requiredLength)
         {
             string errorMessage = "";

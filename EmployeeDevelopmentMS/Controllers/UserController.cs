@@ -26,6 +26,11 @@ namespace EmployeeDevelopmentMS.Controllers
             _signInManager = signInManager;
         }
 
+        public async Task<ApplicationUser> GetApplicationUser()
+        {
+            return await _userManager.GetUserAsync(User);
+        }
+
         public IActionResult ActivateUsers()
         {
             List<RegularUser> allInactiveUsers = new List<RegularUser>();
@@ -130,7 +135,7 @@ namespace EmployeeDevelopmentMS.Controllers
                         if (result.Succeeded)
                         {
                             await _userManager.AddToRoleAsync(user, "EMPLOYEE");
-                            var currentUser = await _userManager.GetUserAsync(User);
+                            var currentUser = await GetApplicationUser();
                             int companyID = _dbUtil.GetCompanyIDByUserID(currentUser.Id);
                             string userID = await _userManager.GetUserIdAsync(user);
                             _dbUtil.AddUserCompany(userID, companyID);
@@ -165,7 +170,7 @@ namespace EmployeeDevelopmentMS.Controllers
             }
             else
             {
-                var currentUser = await _userManager.GetUserAsync(User);
+                var currentUser = await GetApplicationUser();
                 currentUserID = currentUser.Id;
                 int companyID = _dbUtil.GetCompanyIDByUserID(currentUserID);
                 employeesInCompany = _dbUtil.GetEmployeesByCompanyID(companyID);
@@ -237,7 +242,7 @@ namespace EmployeeDevelopmentMS.Controllers
             }
             else
             {
-                var currentUser = await _userManager.GetUserAsync(User);
+                var currentUser = await GetApplicationUser();
                 currentUserID = currentUser.Id;
                 int companyID = _dbUtil.GetCompanyIDByUserID(currentUserID);
                 employeesInCompany = _dbUtil.GetEmployeesByCompanyID(companyID);
@@ -263,7 +268,7 @@ namespace EmployeeDevelopmentMS.Controllers
         public async Task<IActionResult> SavePosition(string json)
         {
             UserPosition selectedUser = JsonConvert.DeserializeObject<UserPosition>(json);
-            var currentUser = await _userManager.GetUserAsync(User);
+            var currentUser = await GetApplicationUser();
             selectedUser.CreatedByID = currentUser.Id;
 
             _dbUtil.SaveNewPosition(selectedUser);
@@ -274,8 +279,11 @@ namespace EmployeeDevelopmentMS.Controllers
         public async Task<IActionResult> UserProfile()
         {
             List<UserPosition> userPositions = new List<UserPosition>();
+            List<UserTimeOff> userTimeOff = new List<UserTimeOff>();
             string currentUserID = "";
             string experience = "";
+            string timeOff = "";
+            int totalVacationDays = 0;
 
             if (User.IsInRole("ADMIN"))
             {
@@ -283,7 +291,7 @@ namespace EmployeeDevelopmentMS.Controllers
             }
             else
             {
-                var currentUser = await _userManager.GetUserAsync(User);
+                var currentUser = await GetApplicationUser();
                 currentUserID = currentUser.Id;
                 userPositions = _dbUtil.GetUserPositionsByUserID(currentUserID);
 
@@ -296,11 +304,30 @@ namespace EmployeeDevelopmentMS.Controllers
                 var maxEndDate = endDateWithMaxStartDate.HasValue ? endDateWithMaxStartDate.Value : DateTime.Now;
 
                 experience = CommonUtil.CalculateExperience(minStartDate, maxEndDate);
+
+                userTimeOff = _dbUtil.GetUserTimeOffByUserID(currentUserID);
+                totalVacationDays = userTimeOff.Select(x => x.TimeOffDays).Sum();
+                timeOff = " (" + totalVacationDays.ToString() + " / " + CommonUtil.MaxVacationDays.ToString() + ")";
             }
 
             ViewBag.TimeInCompany = experience;
+            ViewBag.UserTimeOff = userTimeOff;
+            ViewBag.TimeOffRange = timeOff;
+            ViewBag.TotalVacationDays = totalVacationDays.ToString();
+            ViewBag.MaxVacationDays = CommonUtil.MaxVacationDays.ToString();
 
             return View(userPositions);
+        }
+
+        [AcceptVerbs("Post")]
+        public async Task<IActionResult> AddTimeOff(string json)
+        {
+            UserTimeOff timeOff = JsonConvert.DeserializeObject<UserTimeOff>(json);
+            var currentUser = await GetApplicationUser();
+
+            _dbUtil.AddNewTimeOff(timeOff, currentUser.Id);
+
+            return Json(new { redirectToUrl = Url.Action("UserProfile", "User") });
         }
     }
 }

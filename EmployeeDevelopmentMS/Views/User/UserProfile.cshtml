@@ -3,32 +3,29 @@
 }
 @model List<UserPosition>
 
-<head>
-</head>
-
-<body>
-    @if (ViewData.ModelState.ContainsKey("invalidUserRole"))
-    {
-        <div class="alert alert-danger" role="alert">
-            @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+@if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+    </div>
+}
+else
+{
+    <div class="table-wrapper">
+        <div class="text-center text-white" style="margin-bottom: 50px;">
+            <h2>Профил</h2>
         </div>
-    }
-    else
-    {
-        <div class="table-wrapper">
-            <div class="text-center text-white" style="margin-bottom: 50px;">
-                <h2>Профил</h2>
-            </div>
+        <div>
             <div>
-                <div>
-                    <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <label class="filterTableLabelCellCenter text-white">Лични данни</label>
-                    </div>
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <label class="filterTableLabelCellCenter text-white">Лични данни</label>
                 </div>
-                <table>
+            </div>
+            <table>
+                <tbody style="vertical-align: top;">
                     <tr>
-                        <td style="width: 60%;">
-                            <table class="fancyTable" id="upPositions" style="max-width: 600px; min-width: 600px; margin-top: 0;">
+                        <td style="width: 60%; padding-right: 50px;">
+                            <table class="fancyTable" id="upPositionsTable" style="max-width: 600px; min-width: 600px; margin-top: 0;">
                                 <thead>
                                     <tr>
                                         <th colspan="2">Опит<span>@ViewBag.TimeInCompany</span></th>
@@ -51,10 +48,48 @@
                             </table>
                         </td>
                         <td>
+                            <table class="fancyTable" id="upTimeOffTable" style="max-width: 400px; min-width: 400px; margin-top: 0;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Отпуск<span>@ViewBag.TimeOffRange</span></th>
+                                    </tr>
+                                    <tr>
+                                        <th>Дни</th>
+                                        <th>Период</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var timeOff in ViewBag.UserTimeOff)
+                                    {
+                                        <tr style="vertical-align: top;">
+                                            <td>@timeOff.TimeOffDays</td>
+                                            <td>
+                                                <span>@timeOff.StartDate.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture)</span> -
+                                                <span>@timeOff.EndDate.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture)</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <table style="max-width: 400px; min-width: 400px; margin-top: 0; padding-top: 10px; display: flex; justify-content: center; ">
+                                <tr>
+                                    <td class="filterTableLabelCell text-white">От:</td>
+                                    <td>
+                                        <input type='date' id='upTimeOffStartDate' class='form-control' style='width: 150px; display: inline-block;' required>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="filterTableLabelCell text-white">До:</td>
+                                    <td>
+                                        <input type='date' id='upTimeOffEndDate' class='form-control' style='width: 150px; display: inline-block;' required>
+                                    </td>
+                                </tr>
+                            </table>
+                            <button type="submit" id="upAddTimeOff" class="nav-link btn btn-link text-white" style="margin-top: 10px;" onclick="AddTimeOff(@ViewBag.MaxVacationDays, @ViewBag.TotalVacationDays)">Добави отпуск</button>
                         </td>
                     </tr>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
-    }
-</body>
+    </div>
+}

@@ -706,6 +706,75 @@ namespace EmployeeDevelopmentMS.Utils
             }
         }
 
+        public List<UserTimeOff> GetUserTimeOffByUserID(string userID)
+        {
+            List<UserTimeOff> userTimeOffs = new List<UserTimeOff>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT a.TimeOffID, a.UserID, b.UserName, a.StartDate, a.EndDate
+                               FROM dbo.UserTimeOff a
+                               INNER JOIN dbo.AspNetUsers b ON a.UserID = b.Id
+                               WHERE a.UserID = @UserID
+                               ORDER BY a.StartDate
+                               ";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    UserTimeOff timeOff = new UserTimeOff();
+                    timeOff.TimeOffID = (int)dataReader["TimeOffID"];
+
+                    RegularUser selectedUser = new RegularUser();
+                    selectedUser.UserID = dataReader["UserID"].ToString();
+                    selectedUser.UserName = dataReader["UserName"].ToString();
+                    timeOff.EmployeeOnTimeOff = selectedUser;
+
+                    timeOff.StartDate = (DateTime)dataReader["StartDate"];
+                    timeOff.EndDate = (DateTime)dataReader["EndDate"];
+
+                    userTimeOffs.Add(timeOff);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return userTimeOffs;
+        }
+
+        public void AddNewTimeOff(UserTimeOff timeOff, string currentUserID)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"INSERT INTO dbo.UserTimeOff (UserID,StartDate,EndDate)
+                               VALUES (@UserID,@StartDate,@EndDate)
+                               ";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = currentUserID;
+                command.Parameters.Add("@StartDate", System.Data.SqlDbType.DateTime).Value = timeOff.StartDate;
+                command.Parameters.Add("@EndDate", System.Data.SqlDbType.DateTime).Value = timeOff.EndDate;
+                
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
         public void UpdateUserActiveStatus(string userID, bool isActive)
         {
             var sqlConn = new SqlConnection(_connectionString);
