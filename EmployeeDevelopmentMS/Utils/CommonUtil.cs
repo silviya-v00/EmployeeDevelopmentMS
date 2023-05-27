@@ -58,5 +58,30 @@ namespace EmployeeDevelopmentMS.Utils
 
             return roleName;
         }
+
+        public static string CalculateExperience(DateTime? startDate, DateTime endDate)
+        {
+            string experience = "";
+
+            if (startDate.HasValue)
+            {
+                int timeInCompany = 0;
+                timeInCompany = ((endDate.Year - startDate.Value.Year) * 12) + endDate.Month - startDate.Value.Month;
+                int yearsNum = timeInCompany / 12;
+                int monthsNum = timeInCompany % 12;
+                string yearsStr = (yearsNum != 0 ? (yearsNum.ToString() + " г.") : "");
+                string monthsStr = (monthsNum != 0 ? (monthsNum.ToString() + " м.") : "");
+                experience = yearsStr;
+                experience += ((String.IsNullOrEmpty(yearsStr) || String.IsNullOrEmpty(monthsStr)) ? "" : " ");
+                experience += monthsStr;
+
+                if (!String.IsNullOrEmpty(experience))
+                {
+                    experience = " (" + experience + ")";
+                }
+            }
+
+            return experience;
+        }
     }
 }

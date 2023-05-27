@@ -42,6 +42,10 @@ a {
     border-color: #1861ac;
 }
 
+.nav-link-yellow {
+    color: #D4AF37 !important;
+}
+
 .admin-info {
     width: 400px;
     min-height: 180px;

@@ -270,5 +270,37 @@ namespace EmployeeDevelopmentMS.Controllers
 
             return Json(null);
         }
+
+        public async Task<IActionResult> UserProfile()
+        {
+            List<UserPosition> userPositions = new List<UserPosition>();
+            string currentUserID = "";
+            string experience = "";
+
+            if (User.IsInRole("ADMIN"))
+            {
+                ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
+            }
+            else
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                currentUserID = currentUser.Id;
+                userPositions = _dbUtil.GetUserPositionsByUserID(currentUserID);
+
+                DateTime? minStartDate = null;
+                minStartDate = userPositions.Min(x => x.StartDate);
+                var maxStartDate = userPositions.Max(x => x.StartDate);
+                var endDateWithMaxStartDate = userPositions.Where(x => x.StartDate == maxStartDate)
+                                                           .Select(x => x.EndDate)
+                                                           .FirstOrDefault();
+                var maxEndDate = endDateWithMaxStartDate.HasValue ? endDateWithMaxStartDate.Value : DateTime.Now;
+
+                experience = CommonUtil.CalculateExperience(minStartDate, maxEndDate);
+            }
+
+            ViewBag.TimeInCompany = experience;
+
+            return View(userPositions);
+        }
     }
 }

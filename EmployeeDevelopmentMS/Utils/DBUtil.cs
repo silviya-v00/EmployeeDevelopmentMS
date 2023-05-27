@@ -404,7 +404,7 @@ namespace EmployeeDevelopmentMS.Utils
                                INNER JOIN dbo.UserCompany uc ON a.Id = uc.UserID
                                INNER JOIN dbo.AspNetUserRoles ur ON a.Id = ur.UserId
                                INNER JOIN dbo.AspNetRoles r ON ur.RoleId = r.Id
-                               WHERE r.Name = 'EMPLOYEE'
+                               WHERE r.Name <> 'ADMIN'
 	                                 AND uc.CompanyID = @CompanyID
                                ORDER BY a.UserName";
 

@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Профил";
+}
+@model List<UserPosition>
+
+<head>
+</head>
+
+<body>
+    @if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+    {
+        <div class="alert alert-danger" role="alert">
+            @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <div class="text-center text-white" style="margin-bottom: 50px;">
+                <h2>Профил</h2>
+            </div>
+            <div>
+                <div>
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                        <label class="filterTableLabelCellCenter text-white">Лични данни</label>
+                    </div>
+                </div>
+                <table>
+                    <tr>
+                        <td style="width: 60%;">
+                            <table class="fancyTable" id="upPositions" style="max-width: 600px; min-width: 600px; margin-top: 0;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Опит<span>@ViewBag.TimeInCompany</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var position in Model)
+                                    {
+                                        <tr style="vertical-align: top;">
+                                            <td style="text-align: right;">Позиция</td>
+                                            <td style="text-align: left;">
+                                                <span>@position.Position</span><br />
+                                                <span>@position.Salary лв</span><br />
+                                                <span>@(position.StartDate.HasValue ? position.StartDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</span> -
+                                                <span>@(position.EndDate.HasValue ? position.EndDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "Днес")</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </td>
+                        <td>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    }
+</body>
