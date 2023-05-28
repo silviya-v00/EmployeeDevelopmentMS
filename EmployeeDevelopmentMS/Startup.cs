@@ -33,7 +33,8 @@ namespace EmployeeDevelopmentMS
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();            
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();            
             services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddRazorPages().AddRazorRuntimeCompilation();
             services.AddControllersWithViews();

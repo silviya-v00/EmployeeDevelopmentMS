@@ -17,79 +17,123 @@ else
         </div>
         <div>
             <div>
-                <div style="display: flex; flex-direction: column; justify-content: center;">
-                    <label class="filterTableLabelCellCenter text-white">Лични данни</label>
+                <div class="filterTableSelectCenter" style="display: flex; flex-direction: column; justify-content: center;">
+                    <button type="submit" id="btnUPShowPersonalInfoSection" class="nav-link btn btn-link text-white" style="margin-bottom: 10px;" onclick="ShowSection(this.id, 'personalInfoSection')">Редактирай лични данни</button>
+                    <div id="personalInfoSection" style="display: none;">
+                        <div>
+                            <div class="form-group">
+                                <label for="inputUPUserName" class="text-white">Потребителско име</label>
+                                <input type="text" class="form-control" id="inputUPUserName">
+                                <span id="oldUserName" style="display: none;"></span>
+                                <span id="invalidUserName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputUPPhoneNumber" class="text-white">Телефонен номер</label>
+                                <input type="number" class="form-control" id="inputUPPhoneNumber">
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" id="btnUPSavePersonalInfoSection" class="nav-link btn btn-link text-white" style="margin: 10px auto;">Запиши</button>
+                            <a class="rightUnderlinedLink text-white" onclick="HideSection('btnUPShowPersonalInfoSection', 'personalInfoSection')">Отказ</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <table>
-                <tbody style="vertical-align: top;">
-                    <tr>
-                        <td style="width: 60%; padding-right: 50px;">
-                            <table class="fancyTable" id="upPositionsTable" style="max-width: 600px; min-width: 600px; margin-top: 0;">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2">Опит<span>@ViewBag.TimeInCompany</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var position in Model)
-                                    {
-                                        <tr style="vertical-align: top;">
-                                            <td style="text-align: right;">Позиция</td>
-                                            <td style="text-align: left;">
-                                                <span>@position.Position</span><br />
-                                                <span>@position.Salary лв</span><br />
-                                                <span>@(position.StartDate.HasValue ? position.StartDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</span> -
-                                                <span>@(position.EndDate.HasValue ? position.EndDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "Днес")</span>
-                                            </td>
+            <hr style="height: 2px; background-color: #D4AF37; " />
+            <div>
+                <div class="filterTableSelectCenter" style="display: flex; flex-direction: column; justify-content: center;">
+                    <button type="submit" id="btnUPShowChangePasswordSection" class="nav-link btn btn-link text-white" style="margin: 10px auto;" onclick="ShowSection(this.id, 'changePasswordSection')">Промени парола</button>
+                    <div id="changePasswordSection" style="display: none;">
+                        <div>
+                            <div class="form-group">
+                                <label for="inputUPOldPassword" class="text-white">Стара парола</label>
+                                <input type="password" class="form-control" id="inputUPOldPassword">
+                                <span id="invalidOldPassword" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputUPNewPassword" class="text-white">Нова парола</label>
+                                <input type="text" class="form-control" id="inputUPNewPassword" readonly>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" id="btnUPChangePasswordSection" class="nav-link btn btn-link text-white" style="margin: 10px auto;">Промени</button>
+                            <a class="rightUnderlinedLink text-white" onclick="HideSection('btnUPShowChangePasswordSection', 'changePasswordSection')">Отказ</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr style="height: 2px; background-color: #D4AF37; " />
+            <div>
+                <table>
+                    <tbody style="vertical-align: top;">
+                        <tr>
+                            <td style="width: 60%; padding-right: 50px;">
+                                <table class="fancyTable" id="upPositionsTable" style="max-width: 600px; min-width: 600px; margin-top: 0;">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">Опит<span>@ViewBag.TimeInCompany</span></th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </td>
-                        <td>
-                            <table class="fancyTable" id="upTimeOffTable" style="max-width: 400px; min-width: 400px; margin-top: 0;">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2">Отпуск<span>@ViewBag.TimeOffRange</span></th>
-                                    </tr>
-                                    <tr>
-                                        <th>Дни</th>
-                                        <th>Период</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var timeOff in ViewBag.UserTimeOff)
-                                    {
-                                        <tr style="vertical-align: top;">
-                                            <td>@timeOff.TimeOffDays</td>
-                                            <td>
-                                                <span>@timeOff.StartDate.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture)</span> -
-                                                <span>@timeOff.EndDate.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture)</span>
-                                            </td>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var position in Model)
+                                        {
+                                            <tr style="vertical-align: top;">
+                                                <td style="text-align: right;">Позиция</td>
+                                                <td style="text-align: left;">
+                                                    <span>@position.Position</span><br />
+                                                    <span>@position.Salary лв</span><br />
+                                                    <span>@(position.StartDate.HasValue ? position.StartDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")</span> -
+                                                    <span>@(position.EndDate.HasValue ? position.EndDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "Днес")</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                <table class="fancyTable" id="upTimeOffTable" style="max-width: 400px; min-width: 400px; margin-top: 0;">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">Отпуск<span>@ViewBag.TimeOffRange</span></th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            <table style="max-width: 400px; min-width: 400px; margin-top: 0; padding-top: 10px; display: flex; justify-content: center; ">
-                                <tr>
-                                    <td class="filterTableLabelCell text-white">От:</td>
-                                    <td>
-                                        <input type='date' id='upTimeOffStartDate' class='form-control' style='width: 150px; display: inline-block;' required>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="filterTableLabelCell text-white">До:</td>
-                                    <td>
-                                        <input type='date' id='upTimeOffEndDate' class='form-control' style='width: 150px; display: inline-block;' required>
-                                    </td>
-                                </tr>
-                            </table>
-                            <button type="submit" id="upAddTimeOff" class="nav-link btn btn-link text-white" style="margin-top: 10px;" onclick="AddTimeOff(@ViewBag.MaxVacationDays, @ViewBag.TotalVacationDays)">Добави отпуск</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                        <tr>
+                                            <th>Дни</th>
+                                            <th>Период</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var timeOff in ViewBag.UserTimeOff)
+                                        {
+                                            <tr style="vertical-align: top;">
+                                                <td>@timeOff.TimeOffDays</td>
+                                                <td>
+                                                    <span>@timeOff.StartDate.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture)</span> -
+                                                    <span>@timeOff.EndDate.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture)</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <table style="max-width: 400px; min-width: 400px; margin-top: 0; padding-top: 10px; display: flex; justify-content: center; ">
+                                    <tr>
+                                        <td class="filterTableLabelCell text-white">От:</td>
+                                        <td>
+                                            <input type='date' id='upTimeOffStartDate' class='form-control' min="@DateTime.Now.Year.ToString()-01-01" max="@DateTime.Now.Year.ToString()-12-31" style='width: 150px; display: inline-block;' required>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="filterTableLabelCell text-white">До:</td>
+                                        <td>
+                                            <input type='date' id='upTimeOffEndDate' class='form-control' min="@DateTime.Now.Year.ToString()-01-01" max="@DateTime.Now.Year.ToString()-12-31" style='width: 150px; display: inline-block;' required>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <button type="submit" id="btnUPAddTimeOff" class="nav-link btn btn-link text-white" style="margin-top: 10px;" onclick="AddTimeOff(@ViewBag.MaxVacationDays, @ViewBag.TotalVacationDays)">Добави отпуск</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 }

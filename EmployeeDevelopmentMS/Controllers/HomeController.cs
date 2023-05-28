@@ -204,7 +204,7 @@ namespace EmployeeDevelopmentMS.Controllers
                     }
                     else
                     {
-                        errorMessage = CommonUtil.ValidatePassword(model.Password, 8);
+                        errorMessage = CommonUtil.ValidatePassword(model.Password, CommonUtil.RequiredPasswordLength);
                         if (!String.IsNullOrEmpty(errorMessage))
                         {
                             ModelState.AddModelError("invalidRegistration", errorMessage);

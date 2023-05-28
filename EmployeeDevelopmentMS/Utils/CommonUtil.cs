@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -8,17 +9,64 @@ namespace EmployeeDevelopmentMS.Utils
 {
     public static class CommonUtil
     {
-        public static int MaxVacationDays = 20;
+        public const int MaxVacationDays = 20;
+        public const int RequiredPasswordLength = 8;
+        public const string UpperPattern = @"[A-Z]";
+        public const string LowerPattern = @"[a-z]";
+        public const string CharacterPattern = @"[!@#$%^&*\(\)_\+\-\={}<>,\.\|""'~`:;\\?\/\[\] ]";
+        public const string NumberPattern = @"[0-9]";
+
+        private static Random random = new Random();
+
+        public static string GenerateRandomPassword()
+        {
+            StringBuilder password = new StringBuilder();
+
+            password.Append(GenerateRandomCharacter(UpperPattern));
+            password.Append(GenerateRandomCharacter(LowerPattern));
+            password.Append(GenerateRandomCharacter(CharacterPattern));
+            password.Append(GenerateRandomCharacter(NumberPattern));
+
+            for (int i = password.Length; i < RequiredPasswordLength; i++)
+            {
+                char randomChar = GenerateRandomCharacter();
+                password.Append(randomChar);
+            }
+
+            var shuffledPassword = new string(password.ToString().ToCharArray().OrderBy(_ => random.Next()).ToArray());
+
+            return shuffledPassword;
+        }
+
+        private static char GenerateRandomCharacter()
+        {
+            const string allCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-={}<>,.|\"'~`:;\\?/[] ";
+            int randomIndex = random.Next(0, allCharacters.Length);
+            return allCharacters[randomIndex];
+        }
+
+        private static char GenerateRandomCharacter(string pattern)
+        {
+            Regex regex = new Regex(pattern);
+            char randomChar;
+
+            do
+            {
+                randomChar = GenerateRandomCharacter();
+            } while (!regex.IsMatch(randomChar.ToString()));
+
+            return randomChar;
+        }
 
         public static string ValidatePassword(string password, int requiredLength)
         {
             string errorMessage = "";
             int counter = 0;
             List<string> patterns = new List<string>();
-            patterns.Add(@"[a-z]");
-            patterns.Add(@"[A-Z]");
-            patterns.Add(@"[0-9]");
-            patterns.Add(@"[!@#$%^&*\(\)_\+\-\={}<>,\.\|""'~`:;\\?\/\[\] ]");
+            patterns.Add(LowerPattern);
+            patterns.Add(UpperPattern);
+            patterns.Add(NumberPattern);
+            patterns.Add(CharacterPattern);
 
             // count type of different chars in password
             foreach (string p in patterns)

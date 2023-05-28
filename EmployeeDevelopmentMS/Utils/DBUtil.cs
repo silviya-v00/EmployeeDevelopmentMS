@@ -775,6 +775,66 @@ namespace EmployeeDevelopmentMS.Utils
             }
         }
 
+        public RegularUser GetPersonalInfoByUserID(string userID)
+        {
+            RegularUser userInfo = new RegularUser();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT a.UserName, a.PhoneNumber
+                               FROM dbo.AspNetUsers a
+                               WHERE a.Id = @UserID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+
+                if (dataReader.Read())
+                {
+                    userInfo.UserName = dataReader["UserName"].ToString();
+                    userInfo.PhoneNumber = dataReader["PhoneNumber"].ToString();
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return userInfo;
+        }
+
+        public void UpdatePersonalInfoByUserID(RegularUser userInfo, string userID)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"UPDATE dbo.AspNetUsers
+                               SET UserName = @UserName,
+                                   NormalizedUserName = @NormalizedUserName,
+	                               PhoneNumber = @PhoneNumber
+                               WHERE Id = @UserID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+                command.Parameters.Add("@UserName", System.Data.SqlDbType.NVarChar).Value = userInfo.UserName;
+                command.Parameters.Add("@NormalizedUserName", System.Data.SqlDbType.NVarChar).Value = userInfo.UserName.ToUpper();
+                command.Parameters.Add("@PhoneNumber", System.Data.SqlDbType.NVarChar).Value = !String.IsNullOrEmpty(userInfo.PhoneNumber) ? userInfo.PhoneNumber : DBNull.Value;
+
+                command.ExecuteNonQuery();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
         public void UpdateUserActiveStatus(string userID, bool isActive)
         {
             var sqlConn = new SqlConnection(_connectionString);

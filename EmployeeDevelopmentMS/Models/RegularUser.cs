@@ -50,5 +50,7 @@ namespace EmployeeDevelopmentMS.Models
         public DateTime? RegistrationDate { get; set; }
 
         public DateTime? LastLoginDate { get; set; }
+
+        public string OldUserName { get; set; }
     }
 }

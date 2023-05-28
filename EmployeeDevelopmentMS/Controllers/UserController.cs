@@ -120,7 +120,7 @@ namespace EmployeeDevelopmentMS.Controllers
                 }
                 else
                 {
-                    errorMessage = CommonUtil.ValidatePassword(model.Password, 8);
+                    errorMessage = CommonUtil.ValidatePassword(model.Password, CommonUtil.RequiredPasswordLength);
                     if (!String.IsNullOrEmpty(errorMessage))
                     {
                         ModelState.AddModelError("invalidRegistration", errorMessage);
@@ -317,6 +317,65 @@ namespace EmployeeDevelopmentMS.Controllers
             ViewBag.MaxVacationDays = CommonUtil.MaxVacationDays.ToString();
 
             return View(userPositions);
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> PrefillPersonalInfo()
+        {
+            var currentUser = await GetApplicationUser();
+
+            RegularUser targetUser = _dbUtil.GetPersonalInfoByUserID(currentUser.Id);
+
+            return Json(new { userName = targetUser.UserName, phoneNumber = targetUser.PhoneNumber });
+        }
+
+        [AcceptVerbs("Post")]
+        public async Task<IActionResult> UpdatePersonalInfo(string json)
+        {
+            RegularUser targetUser = JsonConvert.DeserializeObject<RegularUser>(json);
+            var currentUser = await GetApplicationUser();
+
+            string errorMsg = "";
+
+            if (!targetUser.OldUserName.Equals(targetUser.UserName) && _dbUtil.DoesUserNameExist(targetUser.UserName))
+                errorMsg = "Потребителското име е заето!";
+
+            if (String.IsNullOrEmpty(targetUser.UserName))
+                errorMsg = "Потребителското име не може да е празно!";
+
+            _dbUtil.UpdatePersonalInfoByUserID(targetUser, currentUser.Id);
+
+            return Json(new { errorMsg = errorMsg, redirectToUrl = Url.Action("UserProfile", "User") });
+        }
+
+        [HttpGet]
+        public JsonResult GenerateNewPassword()
+        {
+            string password = "";
+            password = CommonUtil.GenerateRandomPassword();
+
+            return Json(new { newPassword = password });
+        }
+
+        [AcceptVerbs("Post")]
+        public async Task<IActionResult> ChangePassword(string json)
+        {
+            RegularUser targetUser = JsonConvert.DeserializeObject<RegularUser>(json);
+            string newPassword = targetUser.ConfirmPassword;
+            var currentUser = await GetApplicationUser();
+
+            string errorMsg = "";
+
+            var result = await _signInManager.CheckPasswordSignInAsync(currentUser, targetUser.Password, lockoutOnFailure: false);
+            if (result.Succeeded)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(currentUser);
+                var resetResult = await _userManager.ResetPasswordAsync(currentUser, token, newPassword);
+            }
+            else
+                errorMsg = "Неправилна стара парола!";
+
+            return Json(new { errorMsg = errorMsg, redirectToUrl = Url.Action("UserProfile", "User") });
         }
 
         [AcceptVerbs("Post")]
