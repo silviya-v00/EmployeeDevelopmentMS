@@ -59,7 +59,7 @@ namespace EmployeeDevelopmentMS.Controllers
             else
             {
                 allUsersCnt = _dbUtil.GetAllUsers().Count;
-                allInactiveUsersCnt = _dbUtil.GetAllInactiveUsers().Count;
+                allInactiveUsersCnt = _dbUtil.GetAllActiveInactiveUsers().Where(x => !x.IsActive).Count();
             }
 
             ViewBag.AllUsersCnt = allUsersCnt;

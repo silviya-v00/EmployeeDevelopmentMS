@@ -342,7 +342,7 @@ namespace EmployeeDevelopmentMS.Utils
             return allUsers;
         }
 
-        public List<RegularUser> GetAllInactiveUsers()
+        public List<RegularUser> GetAllActiveInactiveUsers()
         {
             List<RegularUser> allInactiveUsers = new List<RegularUser>();
             var sqlConn = new SqlConnection(_connectionString);
@@ -357,7 +357,6 @@ namespace EmployeeDevelopmentMS.Utils
                                LEFT OUTER JOIN dbo.UserCompany uc ON u.Id = uc.UserId
                                LEFT OUTER JOIN dbo.Companies c ON uc.CompanyID = c.CompanyID
                                WHERE r.Name <> 'ADMIN'
-	                                 AND u.IsActive = 0
                                ORDER BY c.CompanyName, r.Name, u.FirstName, u.LastName";
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);

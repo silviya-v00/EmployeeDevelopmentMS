@@ -40,7 +40,7 @@ namespace EmployeeDevelopmentMS.Controllers
             }
             else
             {
-                allInactiveUsers = _dbUtil.GetAllInactiveUsers();
+                allInactiveUsers = _dbUtil.GetAllActiveInactiveUsers();
             }
 
             return View(allInactiveUsers);
@@ -54,7 +54,7 @@ namespace EmployeeDevelopmentMS.Controllers
                 _dbUtil.UpdateUserActiveStatus(dataRow.UserID, dataRow.IsActive);
             }
 
-            return Json(new { redirectToUrl = Url.Action("AdminHome", "Home") });
+            return Json(new { redirectToUrl = Url.Action("ActivateUsers", "User") });
         }
 
         public IActionResult AllUsers()

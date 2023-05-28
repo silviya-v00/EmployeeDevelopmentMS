@@ -24,16 +24,16 @@
                 <div style="padding-bottom: 15px;">
                     <div class="submit-btn-group-left">
                         <span>
-                            <input type="checkbox" id="chkActivateAll" class="chkYellow" />
+                            <input type="checkbox" id="chkActivateAll" class="chkYellow inactiveChk" />
                             <label for="chkActivateAll" class="text-white">Активирай всички</label>
                         </span>
                     </div>
                     <div class="submit-btn-group-right">
-                        <button type="submit" id="btnSave" class="btn btn-block" style="width: 50%; float: right;">Запазване</button>
+                        <button type="submit" id="btnSaveInactive" class="btn btn-block" style="width: 50%; float: right;" onclick="SaveActiveStatus('allInactiveUsersTable', true)">Запазване</button>
                     </div>
                 </div>
                 <div>
-                    <table class="fancyTable" id="allUsersTable">
+                    <table class="fancyTable" id="allInactiveUsersTable" style="min-width: 1080px; margin: 50px 0;">
                         <thead>
                             <tr>
                                 <th>Компания</th>
@@ -43,11 +43,11 @@
                                 <th>Имейл</th>
                                 <th>Роля</th>
                                 <th>Регистрация</th>
-                                <th>Активиран?</th>
+                                <th>Активирай?</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var user in Model)
+                            @foreach (var user in Model.Where(x => !x.IsActive))
                             {
                                 <tr data-id="@user.UserID">
                                     <td>@user.CompanyName</td>
@@ -58,7 +58,53 @@
                                     <td>@user.Role.RoleName</td>
                                     <td>@(user.RegistrationDate.HasValue ? user.RegistrationDate.Value.ToString("MM/dd/yyyy") : "")</td>
                                     <td>
-                                        <input type="checkbox" class="chkYellow chkUserActivation" id="" checked="@user.IsActive" />
+                                        <input type="checkbox" class="chkYellow chkUserActivation inactiveChk" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <div style="padding-bottom: 15px;">
+                    <div class="submit-btn-group-left">
+                        <span>
+                            <input type="checkbox" id="chkDeactivateAll" class="chkYellow activeChk" />
+                            <label for="chkDeactivateAll" class="text-white">Деактивирай всички</label>
+                        </span>
+                    </div>
+                    <div class="submit-btn-group-right">
+                        <button type="submit" id="btnSaveActive" class="btn btn-block" style="width: 50%; float: right;" onclick="SaveActiveStatus('allActiveUsersTable', false)">Запазване</button>
+                    </div>
+                </div>
+                <div>
+                    <table class="fancyTable" id="allActiveUsersTable" style="min-width: 1080px; margin: 50px 0;">
+                        <thead>
+                            <tr>
+                                <th>Компания</th>
+                                <th>Потребителско<br />име</th>
+                                <th>Име</th>
+                                <th>Фамилия</th>
+                                <th>Имейл</th>
+                                <th>Роля</th>
+                                <th>Регистрация</th>
+                                <th>Деактивирай?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.Where(x => x.IsActive))
+                            {
+                                <tr data-id="@user.UserID">
+                                    <td>@user.CompanyName</td>
+                                    <td>@user.UserName</td>
+                                    <td>@user.FirstName</td>
+                                    <td>@user.LastName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.Role.RoleName</td>
+                                    <td>@(user.RegistrationDate.HasValue ? user.RegistrationDate.Value.ToString("MM/dd/yyyy") : "")</td>
+                                    <td>
+                                        <input type="checkbox" class="chkYellow chkUserActivation activeChk" />
                                     </td>
                                 </tr>
                             }
