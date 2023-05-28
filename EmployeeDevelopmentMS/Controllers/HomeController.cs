@@ -29,6 +29,11 @@ namespace EmployeeDevelopmentMS.Controllers
             _signInManager = signInManager;
         }
 
+        public async Task<ApplicationUser> GetApplicationUser()
+        {
+            return await _userManager.GetUserAsync(User);
+        }
+
         public IActionResult Index()
         {
             return View();
@@ -68,12 +73,28 @@ namespace EmployeeDevelopmentMS.Controllers
             return View();
         }
 
-        public IActionResult ManagerHome()
+        public async Task<IActionResult> ManagerHome()
         {
+            int employeesInCompany = 0;
+            string currentUserID = "";
+            List<EmployeeTask> allTasksByManager = new List<EmployeeTask>();
+
             if (!User.IsInRole("MANAGER"))
             {
                 ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
             }
+            else
+            {
+                var currentUser = await GetApplicationUser();
+                currentUserID = currentUser.Id;
+                int companyID = _dbUtil.GetCompanyIDByUserID(currentUserID);
+                employeesInCompany = _dbUtil.GetEmployeesByCompanyID(companyID).Count;
+
+                allTasksByManager = _dbUtil.GetAllTasksByUserID(currentUserID, true);
+            }
+
+            ViewBag.EmployeesCnt = employeesInCompany;
+            ViewBag.CompletedTasks = allTasksByManager.Where(x => x.IsCompleted).Count();
 
             return View();
         }

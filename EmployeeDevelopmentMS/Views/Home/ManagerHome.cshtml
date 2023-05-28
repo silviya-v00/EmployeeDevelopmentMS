@@ -14,4 +14,24 @@ else
         <h1 class="display-4">Добре дошли!</h1>
         <p>Управител</p>
     </div>
+    <div class="row" style="margin-top: 50px;">
+        <div class="col-sm-6">
+            <div class="card admin-info" style="float: right;">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Служители</h5>
+                    <p class="card-text">Вашата компания се състои от @ViewBag.EmployeesCnt служителя.</p>
+                    <a class="btn btn-block btn-bottom" asp-area="" asp-controller="User" asp-action="EmployeeManagement">Прегледай</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card admin-info" style="float: left;">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Задачи</h5>
+                    <p class="card-text">В момента има @ViewBag.CompletedTasks завършени задачи.</p>
+                    <a class="btn btn-block btn-bottom" asp-area="" asp-controller="User" asp-action="TaskManagement">Прегледай</a>
+                </div>
+            </div>
+        </div>
+    </div>
 }
