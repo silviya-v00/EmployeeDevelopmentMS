@@ -9,6 +9,10 @@ $(document).ready(function () {
     $('#btnSavePositions').click(function () {
         SavePositions();
     });
+
+    $('#btnAddCourse').click(function () {
+        AddCourse();
+    });
 });
 
 function SelectEmployee() {
@@ -58,9 +62,11 @@ function ReloadTable(filteredData) {
     if ($('#ddEmployees').val() != "-1") {
         $("#iconAddNewPosition").css('display', '');
         $("#rowPositionActions").css('display', '');
+        $("#courseSection").css('display', '');
     }
     else {
         $("#rowPositionActions").css('display', 'none');
+        $("#courseSection").css('display', 'none');
     }
 }
 
@@ -132,6 +138,37 @@ function SavePositions() {
         data: { json: jsonData },
         success: function (response) {
             $('#ddEmployees').val(selUserID).trigger('change');
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+
+        }
+    });
+}
+
+function AddCourse() {
+    var selUserID = $('#ddEmployees').val();
+    var newCourse = $('#newCourse').val();
+
+    var employee = {
+        userID: $('#ddEmployees').val()
+    };
+
+    var data = {
+        employee: employee,
+        courseURL: newCourse
+    };
+
+    var jsonData = JSON.stringify(data);
+
+    $.ajax({
+        type: 'POST',
+        url: '/User/AddNewCourse',
+        datatype: "text",
+        data: { json: jsonData },
+        success: function (response) {
+            $('#ddEmployees').val(selUserID).trigger('change');
+            $('#newCourse').val("");
+            $('html, body').animate({ scrollTop: 0 }, 'fast');
         },
         error: function (jqXHR, textStatus, errorThrown) {
 

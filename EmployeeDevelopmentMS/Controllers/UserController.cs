@@ -276,6 +276,16 @@ namespace EmployeeDevelopmentMS.Controllers
             return Json(null);
         }
 
+        [AcceptVerbs("Post")]
+        public IActionResult AddNewCourse(string json)
+        {
+            Course newCourse = JsonConvert.DeserializeObject<Course>(json);
+
+            _dbUtil.AddNewCourse(newCourse);
+
+            return Json(null);
+        }
+
         public async Task<IActionResult> UserProfile()
         {
             List<UserPosition> userPositions = new List<UserPosition>();

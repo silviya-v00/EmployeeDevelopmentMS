@@ -1,0 +1,16 @@
+USE [EmployeeDevelopmentMS]
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES 
+               WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Courses')
+BEGIN
+	CREATE TABLE dbo.Courses (
+		CourseID int IDENTITY(1,1) PRIMARY KEY,
+		CourseURL nvarchar(max),
+		UserID nvarchar(450),
+		CreatedDate datetime,
+		IsCompleted bit
+		CONSTRAINT FK_Courses_AspNetUsers_UserID FOREIGN KEY (UserID) REFERENCES dbo.AspNetUsers(Id)
+	)
+END
+GO

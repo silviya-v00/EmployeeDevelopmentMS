@@ -705,6 +705,33 @@ namespace EmployeeDevelopmentMS.Utils
             }
         }
 
+        public void AddNewCourse(Course course)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                if (!String.IsNullOrEmpty(course.CourseURL))
+                {
+                    string SQL = @"INSERT INTO dbo.Courses (CourseURL,UserID,CreatedDate)
+                                   VALUES (@CourseURL,@UserID,@CreatedDate)
+                                   ";
+
+                    SqlCommand command = new SqlCommand(SQL, sqlConn);
+                    command.Parameters.Add("@CourseURL", System.Data.SqlDbType.NVarChar).Value = course.CourseURL;
+                    command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = course.Employee.UserID;
+                    command.Parameters.Add("@CreatedDate", System.Data.SqlDbType.DateTime).Value = DateTime.Now;
+
+                    command.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
         public List<UserTimeOff> GetUserTimeOffByUserID(string userID)
         {
             List<UserTimeOff> userTimeOffs = new List<UserTimeOff>();
