@@ -244,3 +244,29 @@ i:hover {
     display: block;
     margin: 0 auto;
 }
+
+.centerColumn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hr-sect {
+    display: flex;
+    flex-basis: 100%;
+    align-items: center;
+    color: white;
+    font-size: 24px;
+    margin: 8px 0px;
+}
+
+    .hr-sect:before,
+    .hr-sect:after {
+        content: "";
+        flex-grow: 1;
+        background: #D4AF37;
+        height: 3px;
+        font-size: 0px;
+        line-height: 0px;
+        margin: 0px 8px;
+    }
