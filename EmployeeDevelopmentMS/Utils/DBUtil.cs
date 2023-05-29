@@ -705,6 +705,44 @@ namespace EmployeeDevelopmentMS.Utils
             }
         }
 
+        public List<Course> GetCoursesByUserID(string userID)
+        {
+            List<Course> courses = new List<Course>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT c.CourseID, c.CourseURL, c.IsCompleted, c.CreatedDate
+                               FROM dbo.Courses c
+                               WHERE c.UserID = @UserID
+							   ORDER BY C.CreatedDate";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    Course course = new Course();
+                    course.CourseID = (int)dataReader["CourseID"];
+                    course.CourseURL = dataReader["CourseURL"].ToString();
+                    course.IsCompleted = dataReader["IsCompleted"] is bool ? (bool)dataReader["IsCompleted"] : false;
+                    course.CreatedDate = (DateTime)dataReader["CreatedDate"];
+
+                    courses.Add(course);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return courses;
+        }
+
         public void AddNewCourse(Course course)
         {
             var sqlConn = new SqlConnection(_connectionString);
@@ -725,6 +763,29 @@ namespace EmployeeDevelopmentMS.Utils
 
                     command.ExecuteNonQuery();
                 }
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+        }
+
+        public void UpdateCourse(int courseID, bool isCompleted)
+        {
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"UPDATE dbo.Courses
+                               SET IsCompleted = @IsCompleted
+                               WHERE CourseID = @CourseID";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@CourseID", System.Data.SqlDbType.Int).Value = courseID;
+                command.Parameters.Add("@IsCompleted", System.Data.SqlDbType.Bit).Value = isCompleted;
+
+                command.ExecuteNonQuery();
             }
             finally
             {

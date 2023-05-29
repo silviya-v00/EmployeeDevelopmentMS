@@ -276,14 +276,54 @@ namespace EmployeeDevelopmentMS.Controllers
             return Json(null);
         }
 
+        public async Task<IActionResult> CourseManagement()
+        {
+            List<Course> courses = new List<Course>();
+            string currentUserID = "";
+
+            if (!User.IsInRole("EMPLOYEE"))
+            {
+                ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
+            }
+            else
+            {
+                var currentUser = await GetApplicationUser();
+                currentUserID = currentUser.Id;
+                courses = _dbUtil.GetCoursesByUserID(currentUserID);
+            }
+
+            return View(courses);
+        }
+
         [AcceptVerbs("Post")]
         public IActionResult AddNewCourse(string json)
         {
             Course newCourse = JsonConvert.DeserializeObject<Course>(json);
+            string errorMsg = "";
 
-            _dbUtil.AddNewCourse(newCourse);
+            Uri uriResult;
+            bool isValidURL = Uri.TryCreate(newCourse.CourseURL, UriKind.Absolute, out uriResult) && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
 
-            return Json(null);
+            if (!isValidURL)
+                errorMsg = "Линкът не е валиден!";
+
+            if (String.IsNullOrEmpty(errorMsg))
+                _dbUtil.AddNewCourse(newCourse);
+
+            return Json(new { errorMsg = errorMsg });
+        }
+
+        [AcceptVerbs("Post")]
+        public IActionResult SaveCourseStatus(string json)
+        {
+            List<Course> data = JsonConvert.DeserializeObject<List<Course>>(json);
+
+            foreach (var dataRow in data)
+            {
+                _dbUtil.UpdateCourse(dataRow.CourseID.Value, dataRow.IsCompleted.Value);
+            }
+
+            return Json(new { redirectToUrl = Url.Action("CourseManagement", "User") });
         }
 
         public async Task<IActionResult> UserProfile()

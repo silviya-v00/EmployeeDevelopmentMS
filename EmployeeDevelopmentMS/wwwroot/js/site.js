@@ -167,6 +167,16 @@ function AddTimeOff(maxVacationDays, totalVacationDays) {
     }
 }
 
+function FormatDate(dateStr) {
+    var date = new Date(dateStr);
+
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
+}
+
 function IsDateValid(date) {
     return date instanceof Date && !isNaN(date);
 }

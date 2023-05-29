@@ -61,7 +61,8 @@
                 <div>
                     <div class="centerColumn">
                         <label class="filterTableLabelCellCenter text-white" for="newCourse">Въведете линк към подходящ курс</label>
-                        <input type="url" id="newCourse" name="url" class="form-control filterTableSelectCenter" pattern="https://.*" required>
+                        <input type="url" id="newCourse" name="url" class="form-control filterTableSelectCenter">
+                        <span id="invalidCourseURL" class="text-danger" style="text-align: center;"></span>
                     </div>
                     <div style="display: flex; justify-content: center; margin-top: 15px;">
                         <button type="submit" id="btnAddCourse" class="btn btn-block" style="width: 30%;">Добавете курс</button>

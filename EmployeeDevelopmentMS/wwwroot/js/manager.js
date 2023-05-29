@@ -70,16 +70,6 @@ function ReloadTable(filteredData) {
     }
 }
 
-function FormatDate(dateStr) {
-    var date = new Date(dateStr);
-
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
-}
-
 function AddNewPositionRow() {
     var rowID = "newPositionRow";
     var row = '<tr id=' + rowID + '>';
@@ -166,9 +156,15 @@ function AddCourse() {
         datatype: "text",
         data: { json: jsonData },
         success: function (response) {
-            $('#ddEmployees').val(selUserID).trigger('change');
-            $('#newCourse').val("");
-            $('html, body').animate({ scrollTop: 0 }, 'fast');
+            if (response.errorMsg) {
+                $("#invalidCourseURL").text(response.errorMsg);
+            }
+            else {
+                $('#ddEmployees').val(selUserID).trigger('change');
+                $('#newCourse').val("");
+                $("#invalidCourseURL").text("");
+                $('html, body').animate({ scrollTop: 0 }, 'fast');
+            }
         },
         error: function (jqXHR, textStatus, errorThrown) {
 

@@ -99,12 +99,26 @@ namespace EmployeeDevelopmentMS.Controllers
             return View();
         }
 
-        public IActionResult EmployeeHome()
+        public async Task<IActionResult> EmployeeHome()
         {
+            List<EmployeeTask> allTasksByUser = new List<EmployeeTask>();
+            int coursesCnt = 0;
+            string currentUserID = "";
+
             if (!User.IsInRole("EMPLOYEE"))
             {
                 ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
             }
+            else
+            {
+                var currentUser = await GetApplicationUser();
+                currentUserID = currentUser.Id;
+                allTasksByUser = _dbUtil.GetAllTasksByUserID(currentUserID, false);
+                coursesCnt = _dbUtil.GetCoursesByUserID(currentUserID).Where(x => !x.IsCompleted.Value).Count();
+            }
+
+            ViewBag.TasksByUser = allTasksByUser.Where(x => !x.IsCompleted).Count();
+            ViewBag.CoursesCnt = coursesCnt;
 
             return View();
         }
