@@ -478,7 +478,7 @@ namespace EmployeeDevelopmentMS.Utils
                     task.Employee = employee;
 
                     task.WorkedHours = dataReader["WorkedHours"] is int ? (int)dataReader["WorkedHours"] : 0;
-                    task.EstimatedHours = (int)dataReader["EstimatedHours"];
+                    task.EstimatedHours = dataReader["EstimatedHours"] is int ? (int)dataReader["EstimatedHours"] : 0;
                     task.RatePoints = dataReader["RatePoints"] is int ? (int)dataReader["RatePoints"] : 0;
                     task.IsRated = dataReader["IsRated"] is bool ? (bool)dataReader["IsRated"] : false;
                     task.IsCompleted = Convert.ToBoolean((int)dataReader["IsCompleted"]);
@@ -526,7 +526,7 @@ namespace EmployeeDevelopmentMS.Utils
                 command.Parameters.Add("@TaskTitle", System.Data.SqlDbType.NVarChar).Value = task.TaskTitle;
                 command.Parameters.Add("@TaskDescription", System.Data.SqlDbType.NVarChar).Value = task.TaskDescription;
                 command.Parameters.Add("@EmployeeID", System.Data.SqlDbType.NVarChar).Value = task.Employee.EmployeeID;
-                command.Parameters.Add("@EstimatedHours", System.Data.SqlDbType.Int).Value = task.EstimatedHours;
+                command.Parameters.Add("@EstimatedHours", System.Data.SqlDbType.Int).Value = task.EstimatedHours.HasValue ? task.EstimatedHours.Value : DBNull.Value;
                 command.Parameters.Add("@CreatedDate", System.Data.SqlDbType.DateTime).Value = DateTime.Now;
                 command.Parameters.Add("@CreatedByID", System.Data.SqlDbType.NVarChar).Value = task.CreatedByID;
 
@@ -573,7 +573,7 @@ namespace EmployeeDevelopmentMS.Utils
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);
                 command.Parameters.Add("@TaskID", System.Data.SqlDbType.Int).Value = task.TaskID;
-                command.Parameters.Add("@WorkedHours", System.Data.SqlDbType.Int).Value = task.WorkedHours;
+                command.Parameters.Add("@WorkedHours", System.Data.SqlDbType.Int).Value = task.WorkedHours.HasValue ? task.WorkedHours.Value : DBNull.Value;
                 command.Parameters.Add("@CompletedDate", System.Data.SqlDbType.DateTime).Value = DateTime.Now;
 
                 command.ExecuteNonQuery();

@@ -12,7 +12,7 @@ namespace EmployeeDevelopmentMS.Models
         public string TaskTitle { get; set; }
         public string TaskDescription { get; set; }
         public Employee Employee { get; set; }
-        public int EstimatedHours { get; set; }
+        public int? EstimatedHours { get; set; }
         public int? WorkedHours { get; set; }
         public DateTime CreatedDate { get; set; }
         public string CreatedByID { get; set; }
