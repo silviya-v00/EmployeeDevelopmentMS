@@ -1,5 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Репорти";
+    DateTime currentDate = DateTime.Now;
+    var currentMonthStart = new DateTime(currentDate.Year, currentDate.Month, 1);
+    var currentYearStart = new DateTime(currentDate.Year, 1, 1);
 }
 
 @if (ViewData.ModelState.ContainsKey("invalidUserRole"))
@@ -15,7 +18,7 @@ else
             <h2>Репорти</h2>
         </div>
         <div>
-            <div class="hr-sect">Служители в компания</div>
+            <div class="hr-sect">Детайли за служители</div>
             <div>
                 <form method="post" asp-controller="User" asp-action="OnPostGenerateEmployeesInCompany">
                     <div class="centerColumn">
@@ -30,6 +33,29 @@ else
                     </div>
                     <div style="display: flex; justify-content: center; margin-top: 15px;">
                         <button type="submit" id="btnGenerateEmployeesInCompany" class="btn btn-block" style="width: 50%; float: right;">Експорт</button>
+                    </div>
+                </form>
+            </div>
+            <div class="hr-sect">Продуктивност на служители</div>
+            <div>
+                <form method="post" asp-controller="User" asp-action="OnPostGenerateEmployeesPerformance">
+                    <div class="centerColumn">
+                        <label class="filterTableLabelCellCenter text-white" for="ddEmployeesPerformance">Изберете служител</label>
+                        <select id="ddEmployeesPerformance" name="selectedEmployee" class="form-control filterTableSelectCenter">
+                            <option value="-1">Всички</option>
+                            @foreach (var option in ViewBag.EmployeesInCompany)
+                            {
+                                <option value="@option.EmployeeID">@option.EmployeeName</option>
+                            }
+                        </select>
+                        <label class="filterTableLabelCellCenter text-white" for="ddPeriod" style="margin-top: 10px;">Изберете период</label>
+                        <select id="ddPeriod" name="selectedPeriod" class="form-control filterTableSelectCenter">
+                            <option value="@currentMonthStart">Текущ месец</option>
+                            <option value="@currentYearStart">Текуща година</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: center; margin-top: 15px;">
+                        <button type="submit" id="btnGenerateEmployeesPerformance" class="btn btn-block" style="width: 50%; float: right;">Експорт</button>
                     </div>
                 </form>
             </div>

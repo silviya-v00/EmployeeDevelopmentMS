@@ -257,7 +257,8 @@ i:hover {
     align-items: center;
     color: white;
     font-size: 24px;
-    margin: 8px 0px;
+    margin-bottom: 8px;
+    margin-top: 50px;
 }
 
     .hr-sect:before,

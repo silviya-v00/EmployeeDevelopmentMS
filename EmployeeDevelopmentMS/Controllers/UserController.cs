@@ -574,6 +574,8 @@ namespace EmployeeDevelopmentMS.Controllers
 
                 foreach (var position in employeeGroup.Positions)
                 {
+                    // <span>&nbsp;</span> is needed in order to escape excel cell autoformatting
+
                     excelContent.AppendLine(@"<tr>");
 
                     if (rowNumInGroup == 1)
@@ -582,21 +584,116 @@ namespace EmployeeDevelopmentMS.Controllers
                                                   <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.FirstName + @"</td>
                                                   <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.LastName + @"</td>
                                                   <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.Email + @"</td>
-                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.PhoneNumber + @"</td>
-                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + (employeeGroupRow.RegistrationDate.HasValue ? employeeGroupRow.RegistrationDate.Value.ToShortDateString() : "") + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'><span>&nbsp;</span>" + employeeGroupRow.PhoneNumber + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'><span>&nbsp;</span>" + (employeeGroupRow.RegistrationDate.HasValue ? employeeGroupRow.RegistrationDate.Value.ToString("MM/dd/yyyy") : "") + @"</td>
                                                   <td class='cellContent' rowspan='" + positionsCnt + @"'>" + (employeeGroupRow.IsActive ? "Активен" : "Неактивен") + @"</td>
                                                   ");
                     }
                     excelContent.AppendLine(@"<td class='cellContent'>" + position.Position + @"</td>
                                               <td class='cellContent'>" + (position.Salary.HasValue ? position.Salary.Value.ToString() : "") + @"</td>
-                                              <td class='cellContent'>" + (position.StartDate.HasValue ? position.StartDate.Value.ToShortDateString() : "") + @"</td>
-                                              <td class='cellContent'>" + (position.EndDate.HasValue ? position.EndDate.Value.ToShortDateString() : "") + @"</td>
+                                              <td class='cellContent'><span>&nbsp;</span>" + (position.StartDate.HasValue ? position.StartDate.Value.ToString("MM/dd/yyyy") : "") + @"</td>
+                                              <td class='cellContent'><span>&nbsp;</span>" + (position.EndDate.HasValue ? position.EndDate.Value.ToString("MM/dd/yyyy") : "") + @"</td>
                                               ");
 
                     excelContent.AppendLine(@"</tr>");
 
                     rowNumInGroup++;
                 }
+            }
+
+            excelContent.AppendLine(@"</tbody>
+                                    </table>
+                                </body>
+                            </html>");
+
+            byte[] fileBytes = Encoding.UTF8.GetBytes(excelContent.ToString());
+
+            return fileBytes;
+        }
+
+        public async Task<IActionResult> OnPostGenerateEmployeesPerformance(string selectedEmployee, string selectedPeriod)
+        {
+            List<EmployeesPerformanceData> employeesPerformances = new List<EmployeesPerformanceData>();
+            string currentUserID = "";
+            var currentUser = await GetApplicationUser();
+            currentUserID = currentUser.Id;
+            DateTime period = DateTime.Parse(selectedPeriod);
+            employeesPerformances = _dbUtil.GetEmployeesPerformance(selectedEmployee, currentUserID, period);
+
+            byte[] fileBytes = GenerateEmployeesPerformanceReport(employeesPerformances, period);
+
+            return File(fileBytes, "application/vnd.ms-excel", "EmployeesPerformance.xls");
+        }
+
+        private byte[] GenerateEmployeesPerformanceReport(List<EmployeesPerformanceData> employeesPerformances, DateTime period)
+        {
+            StringBuilder excelContent = new StringBuilder();
+            string periodStr = period.ToString("MM/yy");
+
+            excelContent.AppendLine(@"<html>
+                                          <head>
+                                            <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+                                            <style type='text/css'>
+		                                        .cellHeader {
+			                                        vertical-align:bottom;
+			                                        text-align:center;
+			                                        border-bottom:1px solid #000000;
+			                                        border-top:1px solid #000000;
+			                                        border-left:1px solid #000000;
+			                                        border-right:1px solid #000000;
+			                                        font-weight:bold;
+			                                        color:#FFFFFF;
+			                                        font-size:12pt;
+			                                        background-color:#4BACC6;
+		                                        }
+		
+		                                        .cellContent {
+			                                        vertical-align:top;
+			                                        text-align:center;
+			                                        border-bottom:1px solid #000000;
+			                                        border-top:1px solid #000000;
+			                                        border-left:1px solid #000000;
+			                                        border-right:1px solid #000000;
+			                                        color:#000000;
+			                                        font-size:11pt;
+			                                        background-color:#DAEEF3;
+		                                        }
+                                            </style>
+                                          </head>
+                                          <body>
+                                            <table>
+                                                <col style='width:121.9999986pt;'>
+                                                <col style='width:74.5555547pt;'>
+                                                <col style='width:74.5555547pt;'>
+                                                <col style='width:121.9999986pt;'>
+                                                <col style='width:74.5555547pt;'>
+                                                <col style='width:74.5555547pt;'>
+                                                <tbody>
+                                                  <tr>
+                                                    <td class='cellHeader' colspan='6'>Данни спрямо " + periodStr + @"</td>
+                                                  </tr>
+                                                  <tr>
+                                                    <td class='cellHeader'>Служител</td>
+                                                    <td class='cellHeader'>Брой<br />задачи</td>
+                                                    <td class='cellHeader'>Изработени<br />часове</td>
+                                                    <td class='cellHeader'>Обща оценка на<br />завършени задачи</td>
+                                                    <td class='cellHeader'>Отпуск</td>
+                                                    <td class='cellHeader'>Завършени<br />курсове</td>
+                                                  </tr>");
+
+            foreach (var row in employeesPerformances)
+            {
+                // <span>&nbsp;</span> is needed in order to escape excel cell autoformatting
+
+                excelContent.AppendLine(@"<tr>
+                                             <td class='cellContent'>" + row.UserName + @"</td>
+                                             <td class='cellContent'>" + row.TaskCount + @"</td>
+                                             <td class='cellContent'><span>&nbsp;</span>" + row.HoursRatio + @"</td>
+                                             <td class='cellContent'><span>&nbsp;</span>" + row.RateRatio + @"</td>
+                                             <td class='cellContent'><span>&nbsp;</span>" + row.TimeOffRatio + @"</td>
+                                             <td class='cellContent'><span>&nbsp;</span>" + row.CourseRatio + @"</td>
+                                         </tr>
+                                         ");
             }
 
             excelContent.AppendLine(@"</tbody>
