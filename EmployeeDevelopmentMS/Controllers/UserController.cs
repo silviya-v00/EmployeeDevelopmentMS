@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace EmployeeDevelopmentMS.Controllers
@@ -437,6 +438,175 @@ namespace EmployeeDevelopmentMS.Controllers
             _dbUtil.AddNewTimeOff(timeOff, currentUser.Id);
 
             return Json(new { redirectToUrl = Url.Action("UserProfile", "User") });
+        }
+
+        public async Task<IActionResult> Reports()
+        {
+            List<Employee> employeesInCompany = new List<Employee>();
+            string currentUserID = "";
+
+            if (!User.IsInRole("MANAGER"))
+            {
+                ModelState.AddModelError("invalidUserRole", "Нямате достъп до тази страница!");
+            }
+            else
+            {
+                var currentUser = await GetApplicationUser();
+                currentUserID = currentUser.Id;
+                int companyID = _dbUtil.GetCompanyIDByUserID(currentUserID);
+                employeesInCompany = _dbUtil.GetEmployeesByCompanyID(companyID).Where(x => x.EmployeeID != "-1").ToList();
+            }
+
+            ViewBag.EmployeesInCompany = employeesInCompany;
+
+            return View();
+        }
+
+        public async Task<IActionResult> OnPostGenerateEmployeesInCompany(string selectedEmployee)
+        {
+            List<EmployeesInCompanyData> employeesInCompany = new List<EmployeesInCompanyData>();
+            string currentUserID = "";
+            var currentUser = await GetApplicationUser();
+            currentUserID = currentUser.Id;
+            employeesInCompany = _dbUtil.GetEmployeesInCompany(selectedEmployee, currentUserID);
+            
+            byte[] fileBytes = GenerateEmployeesInCompanyReport(employeesInCompany);
+
+            return File(fileBytes, "application/vnd.ms-excel", "CompanyEmployees.xls");
+        }
+
+        private byte[] GenerateEmployeesInCompanyReport(List<EmployeesInCompanyData> employeesInCompany)
+        {
+            string company = "";
+            company = employeesInCompany.Select(x => x.CompanyName).FirstOrDefault();
+
+            var groupedData = employeesInCompany.GroupBy(x => new
+                                                {
+                                                    x.CompanyName,
+                                                    x.UserName,
+                                                    x.FirstName,
+                                                    x.LastName,
+                                                    x.Email,
+                                                    x.PhoneNumber,
+                                                    x.RegistrationDate,
+                                                    x.IsActive
+                                                })
+                                                .Select(group => new
+                                                {
+                                                    EmployeeDetails = group.Key,
+                                                    Positions = group.Select(e => new
+                                                    {
+                                                        e.Position,
+                                                        e.Salary,
+                                                        e.StartDate,
+                                                        e.EndDate
+                                                    })
+                                                });
+
+            StringBuilder excelContent = new StringBuilder();
+
+            excelContent.AppendLine(@"<html>
+                                          <head>
+                                            <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+                                            <style type='text/css'>
+		                                        .cellHeader {
+			                                        vertical-align:bottom;
+			                                        text-align:center;
+			                                        border-bottom:1px solid #000000;
+			                                        border-top:1px solid #000000;
+			                                        border-left:1px solid #000000;
+			                                        border-right:1px solid #000000;
+			                                        font-weight:bold;
+			                                        color:#FFFFFF;
+			                                        font-size:12pt;
+			                                        background-color:#4BACC6;
+		                                        }
+		
+		                                        .cellContent {
+			                                        vertical-align:top;
+			                                        text-align:center;
+			                                        border-bottom:1px solid #000000;
+			                                        border-top:1px solid #000000;
+			                                        border-left:1px solid #000000;
+			                                        border-right:1px solid #000000;
+			                                        color:#000000;
+			                                        font-size:11pt;
+			                                        background-color:#DAEEF3;
+		                                        }
+                                            </style>
+                                          </head>
+                                          <body>
+                                            <table>
+                                                <col style='width:112.51110982pt;'>
+                                                <col style='width:80.35555484pt;'>
+                                                <col style='width:80.35555484pt;'>
+                                                <col style='width:200.68888724pt;'>
+                                                <col style='width:86.07777679pt;'>
+                                                <col style='width:74.5555547pt;'>
+                                                <col style='width:66.42222146pt;'>
+                                                <col style='width:148.43333163pt;'>
+                                                <col style='width:53.54444383pt;'>
+                                                <col style='width:60.32222153pt;'>
+                                                <col style='width:58.28888822pt;'>
+                                                <tbody>
+                                                  <tr>
+                                                    <td class='cellHeader' colspan='11'>" + company + @"</td>
+                                                  </tr>
+                                                  <tr>
+                                                    <td class='cellHeader'>Служител</td>
+                                                    <td class='cellHeader'>Име</td>
+                                                    <td class='cellHeader'>Фамилия</td>
+                                                    <td class='cellHeader'>Имейл</td>
+                                                    <td class='cellHeader'>Телефонен номер</td>
+                                                    <td class='cellHeader'>Регистрация</td>
+                                                    <td class='cellHeader'>Активен / Неактивен</td>
+                                                    <td class='cellHeader'>Позиция</td>
+                                                    <td class='cellHeader'>Заплата</td>
+                                                    <td class='cellHeader'>Начална дата</td>
+                                                    <td class='cellHeader'>Крайна дата</td>
+                                                  </tr>");
+
+            foreach (var employeeGroup in groupedData)
+            {
+                int positionsCnt = employeeGroup.Positions.Count();
+                int rowNumInGroup = 1;
+                var employeeGroupRow = employeeGroup.EmployeeDetails;
+
+                foreach (var position in employeeGroup.Positions)
+                {
+                    excelContent.AppendLine(@"<tr>");
+
+                    if (rowNumInGroup == 1)
+                    {
+                        excelContent.AppendLine(@"<td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.UserName + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.FirstName + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.LastName + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.Email + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + employeeGroupRow.PhoneNumber + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + (employeeGroupRow.RegistrationDate.HasValue ? employeeGroupRow.RegistrationDate.Value.ToShortDateString() : "") + @"</td>
+                                                  <td class='cellContent' rowspan='" + positionsCnt + @"'>" + (employeeGroupRow.IsActive ? "Активен" : "Неактивен") + @"</td>
+                                                  ");
+                    }
+                    excelContent.AppendLine(@"<td class='cellContent'>" + position.Position + @"</td>
+                                              <td class='cellContent'>" + (position.Salary.HasValue ? position.Salary.Value.ToString() : "") + @"</td>
+                                              <td class='cellContent'>" + (position.StartDate.HasValue ? position.StartDate.Value.ToShortDateString() : "") + @"</td>
+                                              <td class='cellContent'>" + (position.EndDate.HasValue ? position.EndDate.Value.ToShortDateString() : "") + @"</td>
+                                              ");
+
+                    excelContent.AppendLine(@"</tr>");
+
+                    rowNumInGroup++;
+                }
+            }
+
+            excelContent.AppendLine(@"</tbody>
+                                    </table>
+                                </body>
+                            </html>");
+
+            byte[] fileBytes = Encoding.UTF8.GetBytes(excelContent.ToString());
+
+            return fileBytes;
         }
     }
 }

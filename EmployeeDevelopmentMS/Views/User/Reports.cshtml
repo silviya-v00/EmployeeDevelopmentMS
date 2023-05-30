@@ -1,0 +1,39 @@
+﻿@{
+    ViewData["Title"] = "Репорти";
+}
+
+@if (ViewData.ModelState.ContainsKey("invalidUserRole"))
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewData.ModelState["invalidUserRole"].Errors.FirstOrDefault()?.ErrorMessage
+    </div>
+}
+else
+{
+    <div class="table-wrapper">
+        <div class="text-center text-white" style="margin-bottom: 50px;">
+            <h2>Репорти</h2>
+        </div>
+        <div>
+            <div class="hr-sect">Служители в компания</div>
+            <div>
+                <form method="post" asp-controller="User" asp-action="OnPostGenerateEmployeesInCompany">
+                    <div class="centerColumn">
+                        <label class="filterTableLabelCellCenter text-white" for="ddEmployeesInCompany">Изберете служител</label>
+                        <select id="ddEmployeesInCompany" name="selectedEmployee" class="form-control filterTableSelectCenter">
+                            <option value="-1">Всички</option>
+                            @foreach (var option in ViewBag.EmployeesInCompany)
+                            {
+                                <option value="@option.EmployeeID">@option.EmployeeName</option>
+                            }
+                        </select>
+                    </div>
+                    <div style="display: flex; justify-content: center; margin-top: 15px;">
+                        <button type="submit" id="btnGenerateEmployeesInCompany" class="btn btn-block" style="width: 50%; float: right;">Експорт</button>
+                    </div>
+                </form>
+            </div>
+            <hr style="width: 550px; height: 3px; background-color: #D4AF37; " />
+        </div>
+    </div>
+}

@@ -977,5 +977,58 @@ namespace EmployeeDevelopmentMS.Utils
 
             return allCompanies;
         }
+
+        public List<EmployeesInCompanyData> GetEmployeesInCompany(string userID, string managerID)
+        {
+            List<EmployeesInCompanyData> employees = new List<EmployeesInCompanyData>();
+            var sqlConn = new SqlConnection(_connectionString);
+            sqlConn.Open();
+
+            try
+            {
+                string SQL = @"SELECT d.CompanyName, a.UserName, a.FirstName, a.LastName,
+                        	          a.Email, a.PhoneNumber, a.RegistrationDate, a.IsActive,
+	                                  b.Position, b.Salary, b.StartDate, b.EndDate
+                               FROM dbo.AspNetUsers a
+                               INNER JOIN dbo.UserCompany c ON a.Id = c.UserID
+                               INNER JOIN dbo.Companies d ON c.CompanyID = d.CompanyID
+                               LEFT OUTER JOIN dbo.UserPosition b on a.Id = b.UserID
+                               WHERE (@UserID = '-1' OR (@UserID <> '-1' AND a.Id = @UserID))
+	                                 AND c.CompanyID = (SELECT CompanyID FROM UserCompany WHERE UserID = @ManagerID)
+                               ORDER BY a.FirstName, a.LastName, a.UserName, b.StartDate
+                               ";
+
+                SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
+                command.Parameters.Add("@ManagerID", System.Data.SqlDbType.NVarChar).Value = managerID;
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    EmployeesInCompanyData employee = new EmployeesInCompanyData();
+                    employee.CompanyName = dataReader["CompanyName"].ToString();
+                    employee.UserName = dataReader["UserName"].ToString();
+                    employee.FirstName = dataReader["FirstName"].ToString();
+                    employee.LastName = dataReader["LastName"].ToString();
+                    employee.Email = dataReader["Email"].ToString();
+                    employee.PhoneNumber = dataReader["PhoneNumber"].ToString();
+                    employee.RegistrationDate = (dataReader["RegistrationDate"] is DateTime) ? (DateTime)dataReader["RegistrationDate"] : null;
+                    employee.IsActive = (bool)dataReader["IsActive"];
+                    employee.Position = dataReader["Position"].ToString();
+                    employee.Salary = (dataReader["Salary"] is int) ? (int)dataReader["Salary"] : null;
+                    employee.StartDate = (dataReader["StartDate"] is DateTime) ? (DateTime)dataReader["StartDate"] : null;
+                    employee.EndDate = (dataReader["EndDate"] is DateTime) ? (DateTime)dataReader["EndDate"] : null;
+
+                    employees.Add(employee);
+                }
+                dataReader.Close();
+            }
+            finally
+            {
+                sqlConn.Close();
+            }
+
+            return employees;
+        }
     }
 }
