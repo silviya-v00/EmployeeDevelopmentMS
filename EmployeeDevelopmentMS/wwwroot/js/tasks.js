@@ -6,6 +6,8 @@ $(document).ready(function () {
         $("#btnSaveTask").prop('disabled', true);
     }
 
+    $("#inputWorkedHours").prop('disabled', true);
+
     $("#ddRatePoints").prop('disabled', true);
     $("#ddRatePoints").parent(".form-group").css('visibility', 'hidden');
 
