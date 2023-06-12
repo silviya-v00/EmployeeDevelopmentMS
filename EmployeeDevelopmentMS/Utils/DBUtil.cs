@@ -276,31 +276,27 @@ namespace EmployeeDevelopmentMS.Utils
 
             if (!String.IsNullOrEmpty(searchUser.CompanyIDs))
             {
-                whereAdditions += " AND c.CompanyID IN (" + searchUser.CompanyIDs + ")";
+                whereAdditions += " AND c.CompanyID IN (SELECT value FROM STRING_SPLIT(@CompanyIDs, ','))";
             }
 
             if (!String.IsNullOrEmpty(searchUser.FirstName))
             {
-                whereAdditions += " AND u.FirstName LIKE N'%" + searchUser.FirstName + "%'";
+                whereAdditions += " AND u.FirstName LIKE N'%' + @FirstName + '%'";
             }
 
             if (!String.IsNullOrEmpty(searchUser.LastName))
             {
-                whereAdditions += " AND u.LastName LIKE N'%" + searchUser.LastName + "%'";
+                whereAdditions += " AND u.LastName LIKE N'%' + @LastName + '%'";
             }
 
             if (!searchUser.RoleKey.Equals("ALL"))
             {
-                whereAdditions += " AND r.Name = '" + searchUser.RoleKey + "'";
+                whereAdditions += " AND r.Name = @RoleKey";
             }
 
             if (!searchUser.Status.Equals("ALL"))
             {
-                string isActive = "0";
-                if (searchUser.Status.Equals("ACTIVE"))
-                    isActive = "1";
-
-                whereAdditions += " AND u.IsActive = " + isActive;
+                whereAdditions += " AND u.IsActive = @IsActive";
             }
 
             try
@@ -315,6 +311,31 @@ namespace EmployeeDevelopmentMS.Utils
                                ORDER BY c.CompanyName, r.Name, u.FirstName, u.LastName, u.RegistrationDate";
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);
+
+                if (!String.IsNullOrEmpty(searchUser.CompanyIDs))
+                {
+                    command.Parameters.Add("@CompanyIDs", System.Data.SqlDbType.NVarChar).Value = searchUser.CompanyIDs;
+                }
+
+                if (!String.IsNullOrEmpty(searchUser.FirstName))
+                {
+                    command.Parameters.Add("@FirstName", System.Data.SqlDbType.NVarChar).Value = searchUser.FirstName;
+                }
+
+                if (!String.IsNullOrEmpty(searchUser.LastName))
+                {
+                    command.Parameters.Add("@LastName", System.Data.SqlDbType.NVarChar).Value = searchUser.LastName;
+                }
+
+                if (!searchUser.RoleKey.Equals("ALL"))
+                {
+                    command.Parameters.Add("@RoleKey", System.Data.SqlDbType.NVarChar).Value = searchUser.RoleKey;
+                }
+
+                if (!searchUser.Status.Equals("ALL"))
+                {
+                    command.Parameters.Add("@IsActive", System.Data.SqlDbType.Bit).Value = searchUser.Status.Equals("ACTIVE") ? true : false;
+                }
 
                 SqlDataReader dataReader = command.ExecuteReader();
 
