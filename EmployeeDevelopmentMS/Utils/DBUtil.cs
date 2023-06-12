@@ -1,6 +1,7 @@
 ﻿using EmployeeDevelopmentMS.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
@@ -986,19 +987,10 @@ namespace EmployeeDevelopmentMS.Utils
 
             try
             {
-                string SQL = @"SELECT d.CompanyName, a.UserName, a.FirstName, a.LastName,
-                        	          a.Email, a.PhoneNumber, a.RegistrationDate, a.IsActive,
-	                                  b.Position, b.Salary, b.StartDate, b.EndDate
-                               FROM dbo.AspNetUsers a
-                               INNER JOIN dbo.UserCompany c ON a.Id = c.UserID
-                               INNER JOIN dbo.Companies d ON c.CompanyID = d.CompanyID
-                               LEFT OUTER JOIN dbo.UserPosition b on a.Id = b.UserID
-                               WHERE (@UserID = '-1' OR (@UserID <> '-1' AND a.Id = @UserID))
-	                                 AND c.CompanyID = (SELECT CompanyID FROM UserCompany WHERE UserID = @ManagerID)
-                               ORDER BY a.FirstName, a.LastName, a.UserName, b.StartDate
-                               ";
+                string SQL = @"dbo.GetEmployeesInCompanyReport";
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
                 command.Parameters.Add("@ManagerID", System.Data.SqlDbType.NVarChar).Value = managerID;
                 SqlDataReader dataReader = command.ExecuteReader();
@@ -1039,55 +1031,10 @@ namespace EmployeeDevelopmentMS.Utils
 
             try
             {
-                string SQL = @"SELECT DISTINCT a.UserName,
-				                                CAST(b.TaskCount as nvarchar(max)) as TaskCount,
-				                                CASE WHEN b.EstimatedHoursCount IS NULL
-					                                 THEN NULL
-					                                 ELSE CAST(ISNULL(b.WorkedHoursCount, 0) as nvarchar(max)) + ' / ' + CAST(b.EstimatedHoursCount as nvarchar(max))
-				                                END as HoursRatio,
-				                                CASE WHEN b.TaskCount IS NULL
-					                                 THEN NULL
-					                                 ELSE CAST(ISNULL(b.RatePoints, 0) as nvarchar(max)) + ' / ' + CAST((b.TaskCount * 10) as nvarchar(max))
-				                                END as RateRatio,
-				                                (DATEDIFF(day, c.MinStartDate, c.MaxEndDate) + 1) as TimeOff,
-				                                CASE WHEN d.AllCourseCount IS NULL
-					                                 THEN NULL
-					                                 ELSE CAST(ISNULL(d2.CompletedCourseCount, 0) as nvarchar(max)) + ' / ' + CAST(d.AllCourseCount as nvarchar(max))
-				                                END as CourseRatio
-                                FROM dbo.AspNetUsers a
-                                INNER JOIN dbo.UserCompany com ON a.Id = com.UserID
-                                LEFT OUTER JOIN (
-					                                SELECT t.EmployeeID, COUNT(t.TaskID) as TaskCount,
-					                                SUM(t.WorkedHours) as WorkedHoursCount, SUM(t.EstimatedHours) as EstimatedHoursCount,
-					                                SUM(t.RatePoints) as RatePoints
-					                                FROM dbo.Tasks t
-					                                WHERE t.CompletedDate >= @AsOfPeriod
-					                                GROUP BY t.EmployeeID
-				                                ) b ON a.Id = b.EmployeeID
-                                LEFT OUTER JOIN (
-					                                SELECT v.UserID, MIN(v.StartDate) as MinStartDate, MAX(v.EndDate) as MaxEndDate
-					                                FROM dbo.UserTimeOff v
-					                                WHERE YEAR(v.StartDate) = YEAR(@AsOfPeriod)
-					                                GROUP BY v.UserID
-				                                ) c ON a.Id = c.UserID
-                                LEFT OUTER JOIN (
-					                                SELECT s.UserID, COUNT(s.CourseID) as AllCourseCount
-					                                FROM dbo.Courses s
-					                                WHERE s.CreatedDate >= @AsOfPeriod
-					                                GROUP BY s.UserID
-				                                ) d ON a.Id = d.UserID
-                                LEFT OUTER JOIN (
-					                                SELECT s.UserID, COUNT(s.CourseID) as CompletedCourseCount
-					                                FROM dbo.Courses s
-					                                WHERE s.CreatedDate >= @AsOfPeriod AND s.IsCompleted = 1
-					                                GROUP BY s.UserID
-				                                ) d2 ON a.Id = d2.UserID
-                                WHERE (@UserID = '-1' OR (@UserID <> '-1' AND a.Id = @UserID))
-	                                   AND com.CompanyID = (SELECT CompanyID FROM UserCompany WHERE UserID = @ManagerID)
-                                ORDER BY a.UserName
-                               ";
+                string SQL = @"dbo.GetEmployeesPerformanceReport";
 
                 SqlCommand command = new SqlCommand(SQL, sqlConn);
+                command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.Add("@UserID", System.Data.SqlDbType.NVarChar).Value = userID;
                 command.Parameters.Add("@ManagerID", System.Data.SqlDbType.NVarChar).Value = managerID;
                 command.Parameters.Add("@AsOfPeriod", System.Data.SqlDbType.DateTime).Value = asOfPeriod;
